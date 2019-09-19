@@ -118,6 +118,10 @@ var pipeService = new Vue({
         callback(msg);
       })
     },
+
+
+
+
   }
 });
 

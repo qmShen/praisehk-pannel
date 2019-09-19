@@ -12,44 +12,48 @@
 
 <script>
 
-  import Map from './map.js'
-  import dataService from '../../service/dataService.js'
-
-  export default {
-    name: "Map",
-    data() {
-      return {
-        station: {
-          'station_id': 'KC_A',
-          'station_name': 'Kwai Chung ' + 'Station',
-          'location':[22.3586, 114.1271]
+    import Map from './map.js'
+    import dataService from '../../service/dataService.js'
+    import pipeService from '../../service/pipeService.js'
+    export default {
+        name: "Map",
+        data() {
+            return {
+                station: {
+                    'station_id': 'KC_A',
+                    'station_name': 'Kwai Chung ' + 'Station',
+                    'location':[22.3586, 114.1271]
+                },
+            }
         },
-      }
-    },
-    mounted: function(){
-      this.handler = new Map('map_container', this.station);
+        mounted: function(){
+            this.handler = new Map('map_container', this.station);
 
-      dataService.loadRegions((region)=>{
-        console.log('region', region);''
-        this.handler.set_region_data(region);
-      });
-//
-//      dataService.loadAQStations((region)=>{
-//        console.log('AQ Station', region);''
-////        this.handler.set_region_data(region);
-//      });
-//      dataService.loadAQStations((region)=>{
-//        console.log('region', region);''
-//        this.handler.set_region_data(region);
-//      });
-    },
-    watch:{
-      regionSector: function(new_val, old_val){
+            this.handler.on('click', this.clickOnStation);
+            dataService.loadRegions((region)=>{
+                console.log('region', region);
+                this.handler.set_region_data(region);
+            });
 
-      }
-    },
+            pipeService.onMouseOverCell(msg=>{
+                if(msg['action'] == 'click'){
+                    this.handler.focus(msg['stationId'])
+                }else if(msg['action'] == 'over'){
+                    this.handler.highlightCircle(msg['stationId']);
+                }else if(msg['action'] == 'out'){
+                    this.handler.removeHighlightCircle(msg['stationId']);
+                }
 
-  }
+            })
+        },
+        methods:{
+            clickOnStation(msg){
+                if(msg == undefined) return;
+                console.log('station click component', msg);
+            },
+        }
+
+    }
 </script>
 
 <style>

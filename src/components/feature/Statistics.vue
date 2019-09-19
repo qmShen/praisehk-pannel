@@ -7,7 +7,6 @@
     <div style="height: 100%; width: 100%"></div>
   </div>
 
-  </div>
 </template>
 
 <script>

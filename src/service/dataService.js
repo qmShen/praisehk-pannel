@@ -25,12 +25,21 @@ function loadRegions(callback){
 function loadFeatureData(callback){
   const url = `${dataServerUrl}/feature_data`
   $http.get(url).then(response => {
-    console.log('response', response);
     callback(response.data)
   }, errResponse => {
     console.log(errResponse)
   })
 }
+
+function loadCMAQOBSData(station_id, callback){
+  const url = `${dataServerUrl}/load_cmaq_obs`
+  $http.post(url, {'station_id': station_id}).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+
 
 
 //
@@ -114,5 +123,6 @@ function loadFeatureData(callback){
 
 export default{
   loadRegions,
-  loadFeatureData
+  loadFeatureData,
+  loadCMAQOBSData
 }

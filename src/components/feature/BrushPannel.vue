@@ -1,6 +1,6 @@
 <template>
   <div>
-    brush
+    <div class="mini_head">brush</div>
   </div>
 </template>
 
