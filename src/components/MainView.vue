@@ -6,9 +6,9 @@
         <Statistics style="height: 50%; width: 100%"/>
       </el-col>
       <el-col :span="16" class="right">
-        <BrushPannel v-bind:featureValues='featureValues' style="width: 100%; height: 100px;" class="boundary"/>
-        <TargetFeatureValue style="width: 100%; height: 200px;" class="boundarys"/>
-        <FeatureHeatmap style="width: 100%; height: 200px;" v-for="item in featureValues" v-bind:item="item" v-bind:key="item.feature">
+        <BrushPannel v-bind:featureValues='featureValues' style="width: 100%; height: 8%;" class="boundary"/>
+        <TargetFeatureValue style="width: 100%; height: 17%;" class="boundarys"/>
+        <FeatureHeatmap style="width: 100%; height: calc(100% / 4);" v-for="item in featureValues" v-bind:item="item" v-bind:key="item.feature">
           {{item.feature}}
         </FeatureHeatmap>
       </el-col>

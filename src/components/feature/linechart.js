@@ -6,7 +6,7 @@ let BrushLineChart = function(el){
   let _this = this;
   this.$el = el;
   this.svgWidth = this.$el.clientWidth ;
-  this.svgHeight = this.$el.clientHeight;
+  this.svgHeight = this.$el.clientHeight - 20;
   this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
   this.margin = {'top': 20,'bottom': 20, 'left': 40, 'right':0};
 
@@ -55,7 +55,12 @@ BrushLineChart.prototype.render = function(){
 
   var cmaq_line = d3.line()
     .x(d => xScale(d.time))
-    .y(d => yScale(d.val_cmaq));
+    .y(d => {
+      if(d.val_cmaq == null || d.val_cmaq == 'null'){
+        return  yScale(0)
+      }
+      return yScale(d.val_cmaq)
+    });
 
   let cmaq_contaienr = this.container.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
   cmaq_contaienr.selectAll('path')
@@ -79,6 +84,7 @@ BrushLineChart.prototype.render = function(){
     .data(data).enter().append('circle')
     .attr('cx', d=>xScale(d.time))
     .attr('cy', d=>{
+      console.log('rrr', d.val_aq);
       if(d.val_aq == 'null' || d.val_aq == undefined){
         return yScale(this.yMax);
       }
@@ -91,13 +97,9 @@ BrushLineChart.prototype.render = function(){
       }
       return 'red'
     });
-  // .attr('d', cmaq_line)
-  // .attr('fill', 'none')
-  // .attr('stroke', 'red');
 };
 BrushLineChart.prototype.setData = function(data){
 
-  console.log('read', data);
   this.data  = data;
   this.render();
 

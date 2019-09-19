@@ -85,8 +85,20 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
 
 
   let colorBucketes = this.colors.length;
+  let domain = []
+  if(this.feature == 'PM25'){
+    domain = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
+    maxFeaturValue = 100;
+  }else if(this.feature == 'wind'){
+    domain = [0,2,4,6,8,10,12,14,16]
+    maxFeaturValue = 10;
+  }else if(this.feature == 'windDir'){
+    domain = [18,36,54,72,90,108,126,144,162]
+    maxFeaturValue = 180;
+  }
   let colorScale = d3.scaleQuantile()
-    .domain([0, colorBucketes - 1, maxFeaturValue])
+    // .domain([0, colorBucketes - 1, maxFeaturValue])
+    .domain(domain)
     .range(this.colors);
 
 

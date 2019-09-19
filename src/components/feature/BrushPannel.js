@@ -51,7 +51,7 @@ BrushPannel.prototype.setData = function(dataList){
   this.context.append("g").attr('transform', 'translate(' + [this.margin.left, 0]+')')
     .attr("class", "brush")
     .call(brush)
-    .call(brush.move, [0, this.svgWidth / 40]);
+    .call(brush.move, [0, this.svgWidth / 75]);
 
 
   var xAxis = d3.axisBottom().scale(this.xScale);
