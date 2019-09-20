@@ -4,15 +4,15 @@
   <!--<div style="position:absolute; left: 0px; top:0px; z-index: 999; font-size: 10px" >Model Name: {{model_name}}</div>-->
   <!--</div>-->
   <div style="display: block; position: relative" class="boundary">
-    <div class="mini_head">Map</div>
-    <el-checkbox size="mini">Match</el-checkbox> <el-checkbox size="mini">Mete</el-checkbox> <el-checkbox size="mini">AQ</el-checkbox>
-    <div style="height: calc(100%  - 40px); width: 100%" id='map_container'></div>
+    <div class="mini_head">Mete Map</div>
+<!--    <el-checkbox size="mini">Match</el-checkbox> <el-checkbox size="mini">Mete</el-checkbox> <el-checkbox size="mini">AQ</el-checkbox>-->
+    <div style="height: calc(100%  - 20px); width: 100%" id='mete_map_container'></div>
   </div>
 </template>
 
 <script>
 
-    import Map from './map.js'
+    import MeteMap from './MeteMap.js'
     import dataService from '../../service/dataService.js'
     import pipeService from '../../service/pipeService.js'
     export default {
@@ -27,7 +27,7 @@
             }
         },
         mounted: function(){
-            this.handler = new Map('map_container', this.station);
+            this.handler = new MeteMap('mete_map_container', this.station);
 
             this.handler.on('click', this.clickOnStation);
             dataService.loadRegions((region)=>{

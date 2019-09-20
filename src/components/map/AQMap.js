@@ -10,7 +10,7 @@ import L from "leafLet"
 
 import 'leaflet/dist/leaflet.css'
 
-let Map = function(el, station) {
+let AQMap = function(el, station) {
   // console.log('leaflet', leaflet)
   this.map = L.map(el, { zoomControl:false }).setView(station.location, 6);
 
@@ -19,79 +19,43 @@ let Map = function(el, station) {
     id: 'mapbox.light'
   }).addTo(this.map);
 
-
-
+  
   L.circle(station.location, 100, {
     color: 'steelblue',
     fillColor: '#f03',
     fillOpacity: 0.5
   }).addTo(this.map).bindPopup(station.station_name);
 
-  // var popup = L.popup();
-  // let _this = this;
-  // function onMapClick(e) {
-  //   console.log('e', e);
-  //   popup
-  //     .setLatLng(e.latlng)
-  //     .setContent(e.latlng.toString())
-  //     .openOn(_this.map);
-  // }
-  //
-  // this.map.on('click', onMapClick);
 };
 
-
-
-// Map.prototype.set_region_data = function(testPoints){
-//   let boundaries = testPoints;
-//   for(let i = 0, ilen = boundaries.length; i< ilen; i++){
-//     let _polygon = boundaries[i]['region']
-//     L.polygon(boundaries[i]['region'], {'weight':1}).addTo(this.map).bindPopup(boundaries[i].parameter.region_name)
-//   }
-// };
-Map.prototype.focus = function(station_id){
+AQMap.prototype.focus = function(station_id){
   if(this.meteIdMap[station_id] != undefined){
     this.meteIdMap[station_id]['e'].setStyle({color: 'yellow'});
     this.map.setView(this.meteIdMap[station_id].loc, 9);
   }
 };
 
-Map.prototype.highlightCircle = function(station_id){
+AQMap.prototype.highlightCircle = function(station_id){
   if(this.meteIdMap[station_id] != undefined){
     this.meteIdMap[station_id]['e'].setStyle({color: 'yellow'});
   }
 };
 
-Map.prototype.removeHighlightCircle = function(station_id){
+AQMap.prototype.removeHighlightCircle = function(station_id){
   if(this.meteIdMap[station_id] != undefined){
     this.meteIdMap[station_id]['e'].setStyle({color: '#2e9fa5'});
   }
 };
 
-Map.prototype.on = function(msg, func){
+AQMap.prototype.on = function(msg, func){
   if(msg == 'click'){
     this.clickOnStation = func;
   }
 };
 
-Map.prototype.set_region_data = function(testPoints){
+AQMap.prototype.set_region_data = function(testPoints){
   let _this = this;
-  // let render_list = [];
-  // testPoints.forEach((d, i)=>{
-  //   if(i > 30) return
-  //   render_list.push({
-  //     "type": "Feature",
-  //     "properties": {
-  //       "radius": 100.0003055263856,
-  //     },
-  //     "geometry": { "type": "Point", "coordinates": [ d['longitude'],d['latitude']] }
-  //   })
-  // });
-  //
-  // L.geoJSON([render_list]).addTo(this.map);
-  // console.log('render', render_list);
-  //
-  //
+
   this.meteIdMap = {};
   testPoints.forEach((loc,i)=>{
     let element1= L.circle([loc['latitude_aq'], loc['longitude_aq']], 1300, {
@@ -126,32 +90,8 @@ Map.prototype.set_region_data = function(testPoints){
       [loc['latitude_aq'], loc['longitude_aq']]
     ];
     var polyline = L.polyline(latlngs, {color: '#4ba507'}).addTo(this.map);
-
-    // L.circle([loc['latitude'], loc['longitude']], 1300, {
-    //   color: '#ff5b0d',
-    //   fillColor: '#ff5b0d',
-    //   fillOpacity: 0.3
-    // }).addTo(this.map).bindPopup(' Mete');
-
   })
-
-
-
-  // for(let i = 0, ilen = testPoints.length; i < ilen; i++){
-  //   if(i > 30)
-  //     break;
-  //
-  //
-  //   let d = testPoints[i];
-  //
-  //   L.circle([d['latitude'],d['longitude']], 100, {
-  //     color: 'steelblue',
-  //     fillColor: '#f03',
-  //     fillOpacity: 0.5
-  //   }).addTo(this.map);
-  // }
-
 };
 
 
-export default Map
+export default AQMap
