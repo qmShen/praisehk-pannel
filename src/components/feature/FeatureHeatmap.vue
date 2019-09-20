@@ -23,7 +23,6 @@
         },
 
         watch:{
-
         },
         mounted: function(){
             console.log('item', this.item);
