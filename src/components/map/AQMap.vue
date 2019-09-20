@@ -5,8 +5,11 @@
   <!--</div>-->
   <div style="display: block; position: relative" class="boundary">
     <div class="mini_head">Map</div>
-<!--    <el-checkbox size="mini">Match</el-checkbox> <el-checkbox size="mini">Mete</el-checkbox> <el-checkbox size="mini">AQ</el-checkbox>-->
-    <div style="height: calc(100%  - 20px); width: 100%" id='AQ_map_container'></div>
+    <!--    <el-checkbox size="mini">Match</el-checkbox> <el-checkbox size="mini">Mete</el-checkbox> <el-checkbox size="mini">AQ</el-checkbox>-->
+    <div style="height: calc(100%  - 20px); width: 100%; position: relative">
+      <div style="height: 100%; width: 100%" id='AQ_map_container'></div>
+      <svg style="height: 100%; width: 100%; position: absolute; left:0; top:0; pointer-events: none; z-index: 1000" id="AQ_svg"></svg>
+    </div>
   </div>
 </template>
 
@@ -15,6 +18,7 @@
     import AQMap from './AQMap.js'
     import dataService from '../../service/dataService.js'
     import pipeService from '../../service/pipeService.js'
+
     export default {
         name: "Map",
         data() {
@@ -27,7 +31,7 @@
             }
         },
         mounted: function(){
-            this.handler = new AQMap('AQ_map_container', this.station);
+            this.handler = new AQMap('AQ_map_container', 'AQ_svg', this.station);
 
             this.handler.on('click', this.clickOnStation);
             dataService.loadRegions((region)=>{
