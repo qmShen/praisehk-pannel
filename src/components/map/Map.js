@@ -401,7 +401,7 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
       .startAngle(startAngle)
       .endAngle(endAngle)
 
-    d3.select(this.idMap[id]['render']['WindArc']).transition().attr("d", arc);
+    d3.select(this.idMap[id]['render']['WindArc']).attr("d", arc);
 
   }
 
