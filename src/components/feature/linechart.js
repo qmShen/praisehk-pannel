@@ -84,7 +84,6 @@ BrushLineChart.prototype.render = function(){
     .data(data).enter().append('circle')
     .attr('cx', d=>xScale(d.time))
     .attr('cy', d=>{
-      console.log('rrr', d.val_aq);
       if(d.val_aq == 'null' || d.val_aq == undefined){
         return yScale(this.yMax);
       }
