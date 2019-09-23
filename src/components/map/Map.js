@@ -124,11 +124,11 @@ Map.prototype.loadStations = function(stations){
     });
   }else if(this.featureType == 'Mete'){
     let WindLines = this.stationsContainers.append("line")
-      .style("stroke", '#479886').attr('stroke-width', 3)
+      .style("stroke", '#479886').attr('stroke-width', 1.7)
       .attr("x1", 0).attr("y1",0).attr("x2", 0).attr("y2", 0);
 
     let WindWRFLines = this.stationsContainers.append("line")
-      .style("stroke", '#d77451').attr('stroke-width', 3)
+      .style("stroke", '#d77451').attr('stroke-width', 1.7)
       .attr("x1", 0).attr("y1",0).attr("x2", 0).attr("y2", 0);
 
     let WindArcs = this.stationsContainers.append("path").attr('fill', 'none').attr('stroke', 'grey');
@@ -334,6 +334,53 @@ Map.prototype.showMeteWRF = function(msg){
 
 Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRFData, windDirWRFData){
   let container = d3.select(this.idMap[id]['render']['svg_container']);
+
+  //windData, windDirData, windWRFData, windDirWRFData
+  if(valid(windData) && valid(windDirData) && valid(windWRFData) && valid(windDirWRFData)){
+    d3.select(this.idMap[id]['render']['WindArc']);
+    let lWRF = this.windScale(windWRFData);
+    let lWind = this.windScale(windData);
+    let _windDir = windDirData + 180;
+    let _windWRFDir = windDirWRFData + 180;
+    let _startAngle = null;
+    let _endAngle = null;
+
+    let outer = 0;
+    let color =  null;
+    if(lWRF > lWind){
+      outer = lWind;
+      color = '#d77451';
+    }else{
+      outer = lWRF;
+      color = '#479886';
+    }
+
+    if(_windDir>_windWRFDir){
+      _startAngle = _windWRFDir;
+      _endAngle = _windDir;
+    }else{
+      _startAngle = _windDir;
+      _endAngle = _windWRFDir;
+    }
+
+    let startAngle = _startAngle  / 180 * Math.PI;
+    let endAngle = _endAngle  / 180 * Math.PI;
+
+    if(endAngle - startAngle > 180){
+      let _ = endAngle;
+      endAngle = startAngle;
+      startAngle = _;
+    }
+    var arc = d3.arc()
+      .outerRadius(outer)
+      .innerRadius(0)
+      .startAngle(startAngle)
+      .endAngle(endAngle);
+
+    d3.select(this.idMap[id]['render']['WindArc']).attr("d", arc).attr('fill', color).attr('fill-opacity', 0.5).attr('stroke', 'none')
+
+  }
+
   if(valid(windData) && valid(windDirData)){
     let l = this.windScale(windData);
     let radius = l;
@@ -362,50 +409,6 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
   }else{
 
   }
-  //windData, windDirData, windWRFData, windDirWRFData
-  if(valid(windData) && valid(windDirData) && valid(windWRFData) && valid(windDirWRFData)){
-    d3.select(this.idMap[id]['render']['WindArc']);
-    let lWRF = this.windScale(windWRFData);
-    let lWind = this.windScale(windData);
-    let _windDir = windDirData + 180;
-    let _windWRFDir = windDirWRFData + 180;
-    let _startAngle = null;
-    let _endAngle = null;
-
-    let outer = 0;
-
-    if(lWRF > lWind){
-      outer = lWind;
-    }else{
-      outer = lWRF;
-    }
-    if(_windDir>_windWRFDir){
-      _startAngle = _windWRFDir;
-      _endAngle = _windDir;
-    }else{
-      _startAngle = _windDir;
-      _endAngle = _windWRFDir;
-    }
-
-    let startAngle = _startAngle  / 180 * Math.PI;
-    let endAngle = _endAngle  / 180 * Math.PI;
-
-    if(endAngle - startAngle > 180){
-      let _ = endAngle;
-      endAngle = startAngle;
-      startAngle = _;
-    }
-    var arc = d3.arc()
-      .outerRadius(outer)
-      .innerRadius(outer-2)
-      .startAngle(startAngle)
-      .endAngle(endAngle)
-
-    d3.select(this.idMap[id]['render']['WindArc']).attr("d", arc);
-
-  }
-
-
 };
 
 export default Map
