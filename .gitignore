@@ -12,3 +12,16 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+*.xml
+
+# Mac pycharm xml
+codestyles/
+inspection/
+_mac/
+vcs.xml
+github.xml
+colors.scheme.xml
+debugger.xml
+filetypes.xml
+ide.general.xml
+web-types-registry.xml
