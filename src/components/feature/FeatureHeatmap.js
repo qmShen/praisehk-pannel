@@ -155,7 +155,6 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
       });
     });
     rects.on('click', function(d){
-      console.log('d', d);
       _this.click({
         'timestamp': d.timestamp,
         'stationId': stationId

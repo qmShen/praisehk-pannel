@@ -35,7 +35,17 @@
         mounted: function(){
             this.handler = new Map('mete_map_container', 'mete_svg', this.centerLoc, this.type);
 
-            this.handler.on('mouseover', this,)
+            pipeService.onMouseOverCell(msg=>{
+                if(msg['action'] == 'click'){
+                    // this.handler.showAQCMAQ(msg);
+                    // console.log('click')
+                }
+                else if(msg['action'] == 'over'){
+                    this.handler.mouseoverCircle(msg);
+                }else if(msg['action'] == 'out'){
+                    // this.handler.mouseoutCircle(msg);
+                }
+            });
             // this.handler.on('click', this.clickOnStation);
             // pipeService.onMouseOverCell(msg=>{
             //     if(msg['action'] == 'click'){
@@ -50,23 +60,22 @@
         },
         watch:{
             stations:function(new_stations){
-                this.handler.loadAQstations(new_stations);
+                this.handler.loadStations(new_stations);
             },
             centerLoc: function(new_data){
-                console.log('new' , new_data)
                 this.handler.focus(new_data.loc)
             },
             WindFeatureValue: function(new_data){
-
+                this.handler.loadWindValue(new_data);
             },
             WindWRFFeatureValue: function(new_data){
-
+                this.handler.loadWindWRFValue(new_data);
             },
             WindDirFeatureValue: function(new_data){
-
+                this.handler.loadWindDirValue(new_data);
             },
             WindDirWRFFeatureValue: function(new_data){
-
+                this.handler.loadWindDirWRFValue(new_data);
             }
         },
         methods:{

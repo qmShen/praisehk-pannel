@@ -51,7 +51,7 @@
         },
         watch:{
             stations:function(new_stations){
-                this.handler.loadAQstations(new_stations);
+                this.handler.loadStations(new_stations);
             },
             centerLoc: function(new_data){
                 this.handler.focus(new_data.loc)

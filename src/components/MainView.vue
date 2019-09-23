@@ -97,26 +97,26 @@
             /*
            * Load Wind WRF and observation value
            * */
-            // para = {'ids': 'all', 'feature': 'wind', 'timeRange': 1}
-            // dataService.loadFeatureValue(para, (data)=>{
-            //     this.WindFeatureValue = data;
-            // });
-            //
-            // dataService.loadModelValue(para, (data)=>{
-            //     this.WindWRFFeatureValue = data;
-            // });
+            para = {'ids': 'all', 'feature': 'wind', 'timeRange': 1}
+            dataService.loadFeatureValue(para, (data)=>{
+                this.WindFeatureValue = data;
+            });
+
+            dataService.loadModelValue(para, (data)=>{
+                this.WindWRFFeatureValue = data;
+            });
 
             /*
             * Load Winddir WRF and observation value
             * */
-            // para = {'ids': 'all', 'feature': 'winddir', 'timeRange': 1}
-            // dataService.loadFeatureValue(para, (data)=>{
-            //     this.WindDirFeatureValue = data;
-            // });
-            //
-            // dataService.loadModelValue(para, (data)=>{
-            //     this.WindDirWRFFeatureValue = data;
-            // });
+            para = {'ids': 'all', 'feature': 'winddir', 'timeRange': 1}
+            dataService.loadFeatureValue(para, (data)=>{
+                this.WindDirFeatureValue = data;
+            });
+
+            dataService.loadModelValue(para, (data)=>{
+                this.WindDirWRFFeatureValue = data;
+            });
 
             // version 0 --- end
             pipeService.onMouseOverCell(msg=>{
