@@ -15,40 +15,53 @@
 
 <script>
 
-    import AQMap from './AQMap.js'
+    import Map from './Map.js'
     import dataService from '../../service/dataService.js'
     import pipeService from '../../service/pipeService.js'
 
     export default {
         name: "Map",
+        props:['stations', 'centerLoc', 'AQFeatureValue', 'CMAQFeatureValue'],
         data() {
             return {
+                featureType: 'AQ',
                 station: {
                     'station_id': 'KC_A',
                     'station_name': 'Kwai Chung ' + 'Station',
                     'location':[22.3586, 114.1271]
                 },
+                type: 'AQ'
             }
         },
         mounted: function(){
-            this.handler = new AQMap('AQ_map_container', 'AQ_svg', this.station);
-
-            this.handler.on('click', this.clickOnStation);
-            dataService.loadRegions((region)=>{
-                console.log('region', region);
-                this.handler.set_region_data(region);
-            });
+            this.handler = new Map('AQ_map_container', 'AQ_svg', this.centerLoc,this.type);
 
             pipeService.onMouseOverCell(msg=>{
                 if(msg['action'] == 'click'){
-                    this.handler.focus(msg['stationId'])
-                }else if(msg['action'] == 'over'){
-                    this.handler.highlightCircle(msg['stationId']);
-                }else if(msg['action'] == 'out'){
-                    this.handler.removeHighlightCircle(msg['stationId']);
+                    this.handler.showAQCMAQ(msg);
+                    console.log('click')
                 }
+                else if(msg['action'] == 'over'){
+                    this.handler.mouseoverCircle(msg);
+                }else if(msg['action'] == 'out'){
+                    this.handler.mouseoutCircle(msg);
+                }
+            });
 
-            })
+        },
+        watch:{
+            stations:function(new_stations){
+                this.handler.loadAQstations(new_stations);
+            },
+            centerLoc: function(new_data){
+                this.handler.focus(new_data.loc)
+            },
+            AQFeatureValue: function(new_data){
+                this.handler.loadAQFeatureValue(new_data);
+            },
+            CMAQFeatureValue: function(new_data){
+                this.handler.loadCMAQValue(new_data);
+            }
         },
         methods:{
             clickOnStation(msg){

@@ -51,8 +51,63 @@ function loadCMAQOBSData(station_id, callback){
   })
 }
 
+//  Version 0 --------------------------
+function loadAQStations(callback){
+  const url = `${dataServerUrl}/aq_stations`
+  $http.get(url).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+
+function loadMeteStations(callback){
+  const url = `${dataServerUrl}/mete_stations`
+  $http.get(url).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+
+function loadFeatureValue(param, callback){
+  const url = `${dataServerUrl}/load_observation`
+  $http.post(url, param).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+
+
+function loadModelValue(param, callback){
+  const url = `${dataServerUrl}/load_model_value`
+  $http.post(url, param).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+
+function loadFeatureErrorValue(callback){
+  const url = `${dataServerUrl}/load_errors`
+  $http.get(url).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+
+
+
 export default{
   loadRegions,
   loadFeatureData,
-  loadCMAQOBSData
+  loadCMAQOBSData,
+//  --------------------------
+  loadAQStations,
+  loadMeteStations,
+  loadFeatureValue,
+  loadModelValue
+
 }

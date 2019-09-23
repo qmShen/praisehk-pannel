@@ -18,7 +18,7 @@
         props:["item"],
         data() {
             return {
-
+              type: null
             }
         },
 
@@ -26,6 +26,11 @@
         },
         mounted: function(){
             console.log('item', this.item);
+            if(this.item.feature == 'PM25'){
+                this.type = 'AQ'
+            }else if(this.item.feature == 'Wind' || this.item.feature == 'WindDir' ){
+                this.type = 'Mete'
+            }
             this.handler = new FeatureHeatmap(this.$el, this.item);
             this.handler.on('mouseover', this.handleMouseover);
             this.handler.on('mouseout', this.handleMouseout);
@@ -40,14 +45,17 @@
         methods:{
             handleMouseover(msg){
                 msg['action'] = 'over';
+                msg['type'] = this.type;
                 pipeService.emitMouseOverCell(msg)
             },
             handleMouseout(msg){
                 msg['action'] = 'out';
+                msg['type'] = this.type;
                 pipeService.emitMouseOverCell(msg)
             },
             handleMouseClick(msg){
                 msg['action'] = 'click';
+                msg['type'] = this.type;
                 pipeService.emitMouseOverCell(msg)
             }
         }
