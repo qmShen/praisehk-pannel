@@ -15,7 +15,7 @@ let format_date = function(date){
   return string;
 };
 
-let FeatureHeatmap = function(el, featureObj) {
+let FeatureHeatmap = function(el,featureObj) {
 
   this.$el = el;
   this.svgWidth = this.$el.clientWidth ;
@@ -24,6 +24,10 @@ let FeatureHeatmap = function(el, featureObj) {
 
   this.margin = {'top': 20,'bottom': 20, 'left': 40, 'right':0};
   // initial data
+  this.update(featureObj);
+};
+
+FeatureHeatmap.prototype.update = function(featureObj){
   let _value = featureObj['value'];
   if(_value.length == 0){
     console.log('No data collected!')
@@ -42,13 +46,14 @@ let FeatureHeatmap = function(el, featureObj) {
   // console.log('station_ids', this.valueArray)
   this.renderHeatmap()
 };
+
 FeatureHeatmap.prototype.colors = [
   "#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb",
   "#41b6c4", "#1d91c0", "#225ea8", "#253494",
   "#081d58"
 ];
 
-FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
+FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
   // Hard code
   let _this = this;
   this.stationTimeMap = {};
@@ -56,27 +61,28 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
   let unitWidth = rowHeight;
   // hard code
 
-  start_time = start_time == undefined ?this.valueArray[0].timestamp: start_time;
-  end_time = end_time == undefined ? this.valueArray[parseInt(this.svgWidth / unitWidth)].timestamp: end_time;
+  // start_time = start_time == undefined ?this.valueArray[0].timestamp: start_time;
+  // end_time = end_time == undefined ? this.valueArray[parseInt(this.svgWidth / unitWidth)].timestamp: end_time;
   this.svg.selectAll('g').remove();
   this.container = this.svg.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
 
 
-
+  valueArray = valueArray == undefined ? this.valueArray : valueArray;
   let rowContainer = this.container.selectAll('.row').data(this.station_list).enter().append('g').attr('class', 'row')
     .attr('transform',(d, i) => 'translate('+[0,rowHeight * i] + ')');
 
 
   let renderList = [];
-  this.valueArray.forEach((d,i)=>{
-    if(d.timestamp > start_time && d.timestamp < end_time){
-      renderList.push(d)
-    }
+  valueArray.forEach((d,i)=>{
+    // if(d.timestamp > start_time && d.timestamp < end_time){
+    //   renderList.push(d)
+    // }
+    renderList.push(d)
   });
 
   let _maxArray = [];
   this.station_list.forEach(station_id=>{
-    _maxArray.push(d3.max(this.valueArray, d=>d[station_id]));
+    _maxArray.push(d3.max(valueArray, d=>d[station_id]));
   });
 
   let maxFeaturValue = d3.max(_maxArray);
@@ -146,6 +152,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
       else{
         value = parseInt(value * 100) / 100;
       }
+      return d.timestamp;
       return 'Id: '+ stationId + ' error: ' + value + '\n timestamp: ' + format_date(new Date(d.timestamp * 1000));
     });
     rects.on('mouseover', function(d){
@@ -188,8 +195,10 @@ FeatureHeatmap.prototype.onMouseInter = function(msg){
   let timestamp = msg['timestamp'];
   let stationId = msg['stationId'];
   let dataObj = this.stationTimeMap[stationId][timestamp]
-  let element = dataObj['e'];
-
+  if(dataObj == undefined){
+    return
+  }
+  // let element = dataObj['e'];
 
 
   this.HightLightRowRect.attr('y', dataObj['y']).attr('stroke-width', 0.5);

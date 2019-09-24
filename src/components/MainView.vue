@@ -26,8 +26,7 @@
       </el-col>
       <el-col :span="16" class="right">
         <BrushPannel v-bind:featureValues='featureValues' style="width: 100%; height: 8%;" class="boundary"
-                     v-loading="AQMapLoading"
-                     element-loading-background="rgba(0, 0, 0, 0.4)"
+
         />
         <TargetFeatureValue style="width: 100%; height: 17%; position: relative" class="boundary"
                             v-loading="AQMapLoading"
@@ -40,9 +39,7 @@
           </div>
         </TargetFeatureValue>
         <div style="width: 100%; height: calc(75%); " class="boundary"
-             v-loading="FeatureValueLoading"
-             element-loading-text="Loading"
-             element-loading-background="rgba(0, 0, 0, 0.4)"
+
         >
           <FeatureHeatmap style="width: 100%; height: calc(100% / 3);" v-for="item in featureValues" v-bind:item="item" v-bind:key="item.feature"
           >
@@ -91,34 +88,30 @@
                 FeatureValueLoading: true,
                 AQDataN: 0,
                 MeteDataN: 0,
-
                 timeHandler:null,
                 buttonDisable: false,
                 mapReadyN:0
-
-
             }
         },
         mounted: function(){
             /*
-            * Previous version -1
-            * */
-            dataService.loadFeatureData((data)=>{
-                this.featureValues = data;
-                this.FeatureValueLoading = false;
-            });
-            // Version -1 ending
-
-            /*
             * Previous version 0
             * */
+            let para = null;
+            para = {'startTime': null, 'endTime': null}
+
             pipeService.onTimeRangeSelected(range=>{
 
                 this.AQMapLoading = true;
                 this.MeteMapLoading = true;
                 this.FeatureValueLoading = true;
+                para = {'startTime': range[0], 'endTime': range[1]};
 
-                console.log('timerange selected', range);
+                dataService.loadFeatureData(para, (data)=>{
+                    this.featureValues = data;
+                    this.FeatureValueLoading = false;
+                });
+
                 this.timeRange = range;
                 this.AQDataN = 0;
                 this.MeteDataN = 0;
@@ -127,7 +120,6 @@
                 dataService.loadFeatureValue(para, (data)=>{
                     this.AQFeatureValue = data;
                     this.AQDataN += 1;
-
                 });
 
                 dataService.loadModelValue(para, (data)=>{
@@ -167,7 +159,7 @@
                 this.meteStations = meteStations;
             });
 
-            let para = null;
+
 
 
             // version 0 --- end
@@ -211,18 +203,20 @@
         },
         methods:{
             playAnimation:function(){
+                let _this = this;
                 this.timeHandler = setInterval(()=>{
+                    if(_this.currentTime == undefined){
+                        _this.currentTime = _this.timeRange[0]
+                    }
                     this.currentTime  = this.currentTime + 3600;
                     if(this.currentTime >= this.timeRange[1]){
                         clearInterval(this.timeHandler);
                     }
-                    console.log('222')
 
                 }, 1000)
             },
             stopAnimation: function(){
                 if(this.timeHandler){
-                    console.log('rrr', this.timeHandler)
                     clearInterval(this.timeHandler);
                 }
 

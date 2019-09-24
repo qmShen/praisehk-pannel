@@ -22,6 +22,10 @@
         },
 
         watch:{
+            item:function(){
+                console.log('item changed', this.item);
+                this.handler.update(this.item)
+            }
         },
         mounted: function(){
             console.log('item', this.item);

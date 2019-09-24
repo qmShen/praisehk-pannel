@@ -389,13 +389,6 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
     let startAngle = _startAngle  / 180 * Math.PI;
     let endAngle = _endAngle  / 180 * Math.PI;
 
-    // if(endAngle - startAngle > 180){
-    //   let _ = endAngle;
-    //   endAngle = startAngle;
-    //   startAngle = _;
-    // }
-
-
     var arc = d3.arc()
       .outerRadius(outer)
       .innerRadius(inner)
