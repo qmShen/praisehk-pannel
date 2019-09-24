@@ -391,13 +391,7 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
       endAngle = startAngle;
       startAngle = _;
     }
-    // var arc = d3.arc()
-    //   .outerRadius(outer)
-    //   .innerRadius(inner)
-    //   .startAngle(startAngle)
-    //   .endAngle(startAngle);
-    //
-    // d3.select(this.idMap[id]['render']['WindArc']).attr("d", arc).attr('fill', color).attr('fill-opacity', 0.5).attr('stroke', color).attr('stroke-opacity', 0.5)
+
 
     var arc = d3.arc()
       .outerRadius(outer)

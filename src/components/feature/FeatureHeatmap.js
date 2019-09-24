@@ -41,16 +41,16 @@ let FeatureHeatmap = function(el, featureObj) {
   // console.log('station_ids', this.valueArray)
   this.renderHeatmap()
 };
-FeatureHeatmap.prototype.colors = ["#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb",
+FeatureHeatmap.prototype.colors = [
+  "#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb",
   "#41b6c4", "#1d91c0", "#225ea8", "#253494",
-  "#081d58"];
+  "#081d58"
+];
 
 FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
   // Hard code
   let _this = this;
-
   this.stationTimeMap = {};
-
   let rowHeight = (this.svgHeight - this.margin['top'] - this.margin['bottom']) / this.station_list.length;
   let unitWidth = rowHeight;
   // hard code
@@ -59,6 +59,8 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
   end_time = end_time == undefined ? this.valueArray[parseInt(this.svgWidth / unitWidth)].timestamp: end_time;
   this.svg.selectAll('g').remove();
   this.container = this.svg.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
+
+
 
   let rowContainer = this.container.selectAll('.row').data(this.station_list).enter().append('g').attr('class', 'row')
     .attr('transform',(d, i) => 'translate('+[0,rowHeight * i] + ')');
@@ -101,20 +103,26 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
     .range(this.colors);
 
 
-  rowContainer.each(function(stationId){
+  rowContainer.each(function(stationId, row_i){
 
     let _container = d3.select(this);
     if(_this.stationTimeMap[stationId] == undefined){
       _this.stationTimeMap[stationId] = {}
     }
-
     let featureRange = d3.extent(renderList, d=>d[stationId]);
 
     let cell_containers = _container.selectAll('.cell').data(renderList).enter().append('g').attr('class', 'cell')
       .attr('transform', d => 'translate(' + [xScale(d.timestamp), 0] + ')')
 
-    cell_containers.each(function(d){
-      _this.stationTimeMap[stationId][d.timestamp] = this;
+    cell_containers.each(function(d, col_j){
+      if(_this.stationTimeMap[stationId][d.timestamp] == undefined){
+        _this.stationTimeMap[stationId][d.timestamp] = {};
+      }
+      _this.stationTimeMap[stationId][d.timestamp]['e'] = this;
+      _this.stationTimeMap[stationId][d.timestamp]['x'] = xScale(d.timestamp);
+      _this.stationTimeMap[stationId][d.timestamp]['y'] = row_i*rowHeight;
+
+
     });
     let rects = cell_containers.append('rect')
       .attr('width',unitWidth)
@@ -158,6 +166,11 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
       })
     })
   })
+
+  this.HightLightRowRect = this.container.append('rect').attr('fill', 'none')
+    .attr('stroke', 'red').attr('width', this.svgWidth - this.margin['left']- this.margin['right']).attr('height', unitWidth).attr('stroke-width', 0);
+  this.HightLightColumnRect = this.container.append('rect').attr('fill', 'none')
+    .attr('stroke', 'red').attr('width', unitWidth).attr('height', this.svgHeight - this.margin['top'] - this.margin['bottom']).attr('stroke-width', 0);
 };
 
 FeatureHeatmap.prototype.on = function(msg, func){
@@ -173,14 +186,19 @@ FeatureHeatmap.prototype.on = function(msg, func){
 FeatureHeatmap.prototype.onMouseInter = function(msg){
   let timestamp = msg['timestamp'];
   let stationId = msg['stationId'];
-  let element = this.stationTimeMap[stationId][timestamp];
+  let dataObj = this.stationTimeMap[stationId][timestamp]
+  let element = dataObj['e'];
 
-  if(msg['action'] == 'over'){
-    d3.select(element).select('rect').attr('stroke', 'red');
-  }else if(msg['action'] == 'out'){
-    d3.select(element).select('rect').attr('stroke', 'white');
-  }
+  this.HightLightRowRect.attr('y', dataObj['y']).attr('stroke-width', 1);
+  this.HightLightColumnRect.attr('x', dataObj['x']).attr('stroke-width', 1);
+
+  // if(msg['action'] == 'over'){
+  //   d3.select(element).select('rect').attr('stroke', 'red');
+  // }else if(msg['action'] == 'out'){
+  //   d3.select(element).select('rect').attr('stroke', 'white');
+  // }
 };
+
 
 FeatureHeatmap.prototype.updateByTimeRange = function(timeRange){
   this.renderHeatmap(timeRange[0], timeRange[1]);
