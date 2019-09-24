@@ -357,8 +357,8 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
     d3.select(this.idMap[id]['render']['WindArc']);
     let lWRF = this.windScale(windWRFData);
     let lWind = this.windScale(windData);
-    let _windDir = windDirData + 180;
-    let _windWRFDir = windDirWRFData + 180;
+    let _windDir = (windDirData + 180) % 360;
+    let _windWRFDir = (windDirWRFData + 180) % 360;
     let _startAngle = null;
     let _endAngle = null;
 
@@ -383,14 +383,12 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
       _endAngle = _windWRFDir;
     }
 
+    if(_endAngle - _startAngle > 180){
+      _endAngle = _endAngle - 360;
+    }
+
     let startAngle = _startAngle  / 180 * Math.PI;
     let endAngle = _endAngle  / 180 * Math.PI;
-
-    if(endAngle - startAngle > 180){
-      let _ = endAngle;
-      endAngle = startAngle;
-      startAngle = _;
-    }
     // var arc = d3.arc()
     //   .outerRadius(outer)
     //   .innerRadius(inner)
