@@ -62,6 +62,9 @@ Map.prototype.initializeVisualization = function(){
 };
 Map.prototype.showAQCMAQ = function(msg){
   let timestamp = msg['timestamp'];
+  if(this.timeStationMapAQ == undefined ||this.timeStationMapCMAQ == undefined){
+    return;
+  }
   let AQData = this.timeStationMapAQ[timestamp];
   let CMAQData = this.timeStationMapCMAQ[timestamp];
   for(let id in this.idMap){
@@ -333,7 +336,9 @@ Map.prototype.loadWindDirWRFValue = function(data){
 
 
 Map.prototype.showMeteWRF = function(msg){
-
+  if(this.timeStationMapWind == undefined ||this.timeStationMapWindDir == undefined ||this.timeStationMapWindWRF == undefined ||this.timeStationMapWindDirWRF == undefined){
+    return
+  }
   let timestamp = msg['timestamp'];
   let WindData = this.timeStationMapWind[timestamp];
   let WindDirData = this.timeStationMapWindDir[timestamp];
