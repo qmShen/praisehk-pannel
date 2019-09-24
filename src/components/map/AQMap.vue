@@ -30,7 +30,8 @@
                     'station_name': 'Kwai Chung ' + 'Station',
                     'location':[22.3586, 114.1271]
                 },
-                type: 'AQ'
+                type: 'AQ',
+                timestamp: null
             }
         },
         mounted: function(){
@@ -39,15 +40,16 @@
             pipeService.onMouseOverCell(msg=>{
                 if(msg['action'] == 'click'){
                     this.handler.showAQCMAQ(msg);
-                    console.log('click')
-                }
-                else if(msg['action'] == 'over'){
+                } else if(msg['action'] == 'over'){
                     this.handler.mouseoverCircle(msg);
-                }else if(msg['action'] == 'out'){
+                } else if(msg['action'] == 'out'){
                     this.handler.mouseoutCircle(msg);
                 }
             });
 
+            pipeService.onTimerTicked(() => {
+                this.handler.showNextAQCMAQ();
+            })
         },
         watch:{
             stations:function(new_stations){

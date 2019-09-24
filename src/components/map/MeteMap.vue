@@ -29,7 +29,8 @@
                     'station_name': 'Kwai Chung ' + 'Station',
                     'location':[22.3586, 114.1271]
                 },
-                type: 'Mete'
+                type: 'Mete',
+                timestamp: null
             }
         },
         mounted: function(){

@@ -19,6 +19,8 @@
       <el-col :span="16" class="right">
         <BrushPannel v-bind:featureValues='featureValues' style="width: 100%; height: 8%;" class="boundary"/>
         <TargetFeatureValue style="width: 100%; height: 17%;" class="boundarys"/>
+        <button v-on:click="startTimer">Start</button>
+        <button v-on:click="stopTimer">Stop</button>
         <FeatureHeatmap style="width: 100%; height: calc(100% / 4);" v-for="item in featureValues" v-bind:item="item" v-bind:key="item.feature">
           {{item.feature}}
         </FeatureHeatmap>
@@ -58,7 +60,8 @@
                 WindDirFeatureValue: null,
                 WindDirWRFFeatureValue: null,
 
-
+                // Timer
+                timer: null,
             }
         },
         mounted: function(){
@@ -81,11 +84,10 @@
                 this.meteStations = meteStations;
             });
 
-            let para = null;
             /*
             * Load PM25 CMAQ and observation value
             * */
-            para = {'ids': 'all', 'feature': 'PM25', 'timeRange': 1}
+            let para = {'ids': 'all', 'feature': 'PM25', 'timeRange': 1};
             dataService.loadFeatureValue(para, (data)=>{
                 this.AQFeatureValue = data;
             });
@@ -138,7 +140,17 @@
             FeatureHeatmap,
             BrushPannel,
             TargetFeatureValue
-        }
+        },
+        methods: {
+            startTimer(msg) {
+                this.timestamp = msg['timestamp'];
+                this.timer = setInterval(pipeService.emitTimerTicked, 1000);
+            },
+            stopTimer() {
+                clearInterval(this.timer);
+                this.timer = null;
+            }
+        },
     }
 </script>
 

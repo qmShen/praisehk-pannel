@@ -10,30 +10,21 @@ let format_date = function(date){
   let month = date.getMonth() >= 9?date.getMonth() + 1:'0' + (date.getMonth() + 1);
   let day = date.getDate() >= 10?date.getDate():'0' + date.getDate();
   let hour = date.getHours() >= 10?date.getHours():'0' + date.getHours();
-  let string = date.getFullYear() + '-' + month + '-' + day + ' ' + hour +':00:00  ' + weekDay[date.getDay()];
-  return string;
+  return date.getFullYear() + '-' + month + '-' + day + ' ' + hour + ':00:00  ' + weekDay[date.getDay()];
 };
 
 
 let FeatureHeatmap = function(el, featureObj) {
 
-  this.$el = el;
-  this.svgWidth = this.$el.clientWidth ;
-  this.svgHeight = this.$el.clientHeight;
-  this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
-  // this.margin = {'top': 20,'bottom': 0, 'left': 0, 'right':0};
-   this.margin = {'top': 20,'bottom': 20, 'left': 40, 'right':0};
   // initial data
   let _value = featureObj['value'];
   if(_value.length == 0){
     console.log('No data collected!')
     return
   }
-  let _item = featureObj['value'][0];
   this.station_list = [];
-  for(let key in _item){
+  for(let key in _value[0]){  // the list of column name
     if(key == "timestamp") continue
-
     this.station_list.push(key);
   }
 
@@ -56,8 +47,8 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
   let unitWidth = rowHeight;
   // hard code
 
-  start_time = start_time == undefined ?this.valueArray[0].timestamp: start_time;
-  end_time = end_time == undefined ? this.valueArray[parseInt(this.svgWidth / unitWidth)].timestamp: end_time;
+  start_time = start_time == undefined? this.valueArray[0].timestamp: start_time;
+  end_time = end_time == undefined? this.valueArray[parseInt(this.svgWidth / unitWidth)].timestamp: end_time;
   this.svg.selectAll('g').remove();
   this.container = this.svg.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
 
@@ -83,7 +74,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
 
   let xScale = d3.scaleLinear().domain(timeRange).range([0, _this.svgWidth - _this.margin['right'] - _this.margin.left]);
 
-
+  // let x= xScale(t);
   let colorBucketes = this.colors.length;
   let domain = []
   if(this.feature == 'PM25'){
@@ -175,25 +166,29 @@ FeatureHeatmap.prototype.on = function(msg, func){
 
 };
 
-FeatureHeatmap.prototype.onMouseInter = function(msg){
+FeatureHeatmap.prototype.onMouseInter = function(msg) {
+  let s;
   let timestamp = msg['timestamp'];
   let stationId = msg['stationId'];
-  let element = this.stationTimeMap[stationId][timestamp];
+  let horizontal = [];
 
+  for (s in this.stationTimeMap[stationId]) {
+    horizontal.push(this.stationTimeMap[stationId][s]);
+  }
   if(msg['action'] == 'over'){
-    d3.select(element).select('rect').attr('stroke', 'red');
+    horizontal.forEach( element => d3.select(element).select('rect').attr('stroke', 'red'));
+
+    // d3.select(element).select('rect').attr('stroke', 'red');
     // element.parentNode.appendChild(element);
     // element.parentNode.parentNode.appendChild(element.parentNode);
   }else if(msg['action'] == 'out'){
-    d3.select(element).select('rect').attr('stroke', 'white');
+    horizontal.forEach( element => d3.select(element).select('rect').attr('stroke', 'white'));
+
   }
 };
 
 FeatureHeatmap.prototype.updateByTimeRange = function(timeRange){
   this.renderHeatmap(timeRange[0], timeRange[1]);
 }
-
-
-
 
 export default FeatureHeatmap

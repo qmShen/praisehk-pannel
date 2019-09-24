@@ -48,9 +48,20 @@ Map.prototype.initializeVisualization = function(){
   this.sizeScale = d3.scaleLinear().domain([0, 150]).range([0, 20])
 };
 Map.prototype.showAQCMAQ = function(msg){
-  let timestamp = msg['timestamp'];
-  let AQData = this.timeStationMapAQ[timestamp];
-  let CMAQData = this.timeStationMapCMAQ[timestamp];
+  if ( msg['timestamp'] == undefined || msg['timestamp'] == null ) return;
+  this.timestamp = msg['timestamp'];
+  let AQData = this.timeStationMapAQ[this.timestamp];
+  let CMAQData = this.timeStationMapCMAQ[this.timestamp];
+  for(let id in this.idMap){
+    this.visualizeCMAQAQunit(id, AQData[id], CMAQData[id]);
+  }
+};
+
+Map.prototype.showNextAQCMAQ = function(){
+  if ( this.timestamp == null ) return;
+  this.timestamp = (parseInt(this.timestamp) + 3600).toString();
+  let AQData = this.timeStationMapAQ[this.timestamp];
+  let CMAQData = this.timeStationMapCMAQ[this.timestamp];
   for(let id in this.idMap){
     this.visualizeCMAQAQunit(id, AQData[id], CMAQData[id]);
   }
