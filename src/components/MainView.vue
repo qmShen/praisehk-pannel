@@ -7,7 +7,7 @@
                v-bind:AQFeatureValue="AQFeatureValue"
                v-bind:CMAQFeatureValue="CMAQFeatureValue"
                v-bind:currentTime="currentTime"
-               v-loading="MeteMapLoading"
+               v-loading="AQMapLoading"
                element-loading-text="Loading"
                element-loading-background="rgba(0, 0, 0, 0.7)"
                style="height: 50%; width: 100%"
@@ -19,7 +19,7 @@
                  v-bind:WindDirFeatureValue = "WindDirFeatureValue"
                  v-bind:WindDirWRFFeatureValue = "WindDirWRFFeatureValue"
                  v-bind:currentTime="currentTime"
-                 v-loading="AQMapLoading"
+                 v-loading="MeteMapLoading"
                  element-loading-text="Loading"
                  element-loading-background="rgba(0, 0, 0, 0.7)"
                  style="height: 50%; width: 100%"/>
@@ -118,11 +118,13 @@
                 this.mapReadyN = 0;
                 para = {'ids': 'all', 'feature': 'PM25', 'timeRange': 1, 'startTime': range[0], 'endTime': range[1]}
                 dataService.loadFeatureValue(para, (data)=>{
+                    console.log('AQ feature Value', data);
                     this.AQFeatureValue = data;
                     this.AQDataN += 1;
                 });
 
                 dataService.loadModelValue(para, (data)=>{
+                    console.log('CMAQ feature Value', data);
                     this.CMAQFeatureValue = data;
                     this.AQDataN += 1;
                 });
@@ -150,7 +152,7 @@
                 });
             });
 
-
+            // Done
             dataService.loadAQStations((AQStations)=>{
                 this.AQStations = AQStations;
             });

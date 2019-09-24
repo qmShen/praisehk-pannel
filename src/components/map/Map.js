@@ -58,7 +58,7 @@ Map.prototype.mouseoutCircle = function(msg){
 };
 Map.prototype.initializeVisualization = function(){
   this.aqSizeScale = d3.scaleLinear().domain([0, 150]).range([0, 20]);
-  this.windScale = d3.scaleLinear().domain([0, 20]).range([0, 200]);
+  this.windScale = d3.scaleLinear().domain([0, 20]).range([0, 120]);
 };
 Map.prototype.showAQCMAQ = function(msg){
   let timestamp = msg['timestamp'];
@@ -67,6 +67,9 @@ Map.prototype.showAQCMAQ = function(msg){
   }
   let AQData = this.timeStationMapAQ[timestamp];
   let CMAQData = this.timeStationMapCMAQ[timestamp];
+  if(AQData == undefined || CMAQData == undefined){
+    return
+  }
   for(let id in this.idMap){
     this.visualizeCMAQAQunit(id, AQData[id], CMAQData[id]);
   }
@@ -344,11 +347,43 @@ Map.prototype.showMeteWRF = function(msg){
   let WindDirData = this.timeStationMapWindDir[timestamp];
   let WindWRFData = this.timeStationMapWindWRF[timestamp];
   let WindDirWRFData = this.timeStationMapWindDirWRF[timestamp];
+  if(WindData == undefined || WindDirData == undefined || WindWRFData == undefined || WindDirWRFData == undefined){
+    // should render None
+    for(let id in this.idMap){
+      this.visualizeNothing(id);
+    }
+    return
+  }
   for(let id in this.idMap){
     this.visualizeWindDirUnit(id, WindData[id], WindDirData[id], WindWRFData[id], WindDirWRFData[id]);
   }
 };
+Map.prototype.visualizeNothing = function(id){
+  let container = d3.select(this.idMap[id]['render']['svg_container']);
+  var arc = d3.arc()
+    .outerRadius(0)
+    .innerRadius(0)
+    .startAngle(0)
+    .endAngle(0);
 
+  d3.select(this.idMap[id]['render']['WindArc']).attr("d", arc).attr('fill-opacity', 0).attr('stroke-opacity', 0);
+  d3.select(this.idMap[id]['render']['WindArc']).transition().attr('fill-opacity', 0.5).attr('stroke-opacity', 0.5);
+
+
+  d3.select(this.idMap[id]['render']['WindLine']).transition()
+    .attr("x1", 0)
+    .attr("y1", 0)
+    .attr("x2", 0)
+    .attr("y2", 0)
+
+  d3.select(this.idMap[id]['render']['WindWRFLine']).transition()
+    .attr("x1", 0)
+    .attr("y1",0)
+    .attr("x2", 0 )
+    .attr("y2", 0)
+
+
+};
 Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRFData, windDirWRFData){
   let container = d3.select(this.idMap[id]['render']['svg_container']);
 
