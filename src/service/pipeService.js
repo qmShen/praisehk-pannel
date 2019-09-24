@@ -14,8 +14,9 @@ var pipeService = new Vue({
     CHECKINDIVIDUAL: 'check_individual',
 
     MOUSEOVERFEATUREIMPORTANCE: 'mouseover_featureimportance_boxplot',
-    TIMERANGESELECTED : 'time_range_selected'
+    TIMERANGESELECTED : 'time_range_selected',
 
+    TIMERTICKED: 'timer_ticked',
   },
 
   methods:{
@@ -116,6 +117,19 @@ var pipeService = new Vue({
     onTimeRangeSelected: function(callback){
       this.$on(this.TIMERANGESELECTED, function(msg){
         callback(msg);
+      })
+    },
+
+
+    //------------------------------------------------------------
+    //When the timer has ticked, this will trigger
+    //msg{start: sec, end: sec}
+    emitTimerTicked: function(){
+      this.$emit(this.TIMERTICKED);
+    },
+    onTimerTicked: function(callback){
+      this.$on(this.TIMERTICKED, function(){
+        callback();
       })
     },
 

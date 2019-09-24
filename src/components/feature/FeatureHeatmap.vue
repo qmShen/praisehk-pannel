@@ -39,11 +39,11 @@
             this.handler.on('mouseout', this.handleMouseout);
             this.handler.on('click', this.handleMouseClick);
             pipeService.onMouseOverCell(msg=>{
-                this.handler.onMouseInter(msg)
-            })
+                this.handler.onMouseInter(msg);
+            });
             pipeService.onTimeRangeSelected(timerange=>{
                 this.handler.updateByTimeRange(timerange);
-            })
+            });
         },
         methods:{
             handleMouseover(msg){
@@ -60,8 +60,8 @@
                 msg['action'] = 'click';
                 msg['type'] = this.type;
                 pipeService.emitMouseOverCell(msg)
-            }
-        }
+            },
+        },
 
     }
 </script>
