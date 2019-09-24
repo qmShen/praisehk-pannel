@@ -14,15 +14,14 @@ let format_date = function(date){
   return string;
 };
 
-
 let FeatureHeatmap = function(el, featureObj) {
 
   this.$el = el;
   this.svgWidth = this.$el.clientWidth ;
   this.svgHeight = this.$el.clientHeight;
   this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
-  // this.margin = {'top': 20,'bottom': 0, 'left': 0, 'right':0};
-   this.margin = {'top': 20,'bottom': 20, 'left': 40, 'right':0};
+
+  this.margin = {'top': 20,'bottom': 20, 'left': 40, 'right':0};
   // initial data
   let _value = featureObj['value'];
   if(_value.length == 0){
@@ -97,7 +96,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
     maxFeaturValue = 180;
   }
   let colorScale = d3.scaleQuantile()
-    // .domain([0, colorBucketes - 1, maxFeaturValue])
+  // .domain([0, colorBucketes - 1, maxFeaturValue])
     .domain(domain)
     .range(this.colors);
 
@@ -108,10 +107,8 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
     if(_this.stationTimeMap[stationId] == undefined){
       _this.stationTimeMap[stationId] = {}
     }
-    // _container.append('rect').attr('width', _this.svgWidth).attr('height', rowHeight).attr('stroke', 'red').attr('fill', 'none').attr('stroke-width', 0.3);
 
     let featureRange = d3.extent(renderList, d=>d[stationId]);
-
 
     let cell_containers = _container.selectAll('.cell').data(renderList).enter().append('g').attr('class', 'cell')
       .attr('transform', d => 'translate(' + [xScale(d.timestamp), 0] + ')')
@@ -171,7 +168,6 @@ FeatureHeatmap.prototype.on = function(msg, func){
   }else if(msg == 'click'){
     this.click = func;
   }
-
 };
 
 FeatureHeatmap.prototype.onMouseInter = function(msg){
@@ -181,8 +177,6 @@ FeatureHeatmap.prototype.onMouseInter = function(msg){
 
   if(msg['action'] == 'over'){
     d3.select(element).select('rect').attr('stroke', 'red');
-    // element.parentNode.appendChild(element);
-    // element.parentNode.parentNode.appendChild(element.parentNode);
   }else if(msg['action'] == 'out'){
     d3.select(element).select('rect').attr('stroke', 'white');
   }
@@ -190,7 +184,7 @@ FeatureHeatmap.prototype.onMouseInter = function(msg){
 
 FeatureHeatmap.prototype.updateByTimeRange = function(timeRange){
   this.renderHeatmap(timeRange[0], timeRange[1]);
-}
+};
 
 
 
