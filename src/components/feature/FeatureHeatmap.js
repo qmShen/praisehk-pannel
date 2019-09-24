@@ -4,6 +4,7 @@
 
 
 import * as d3 from "d3";
+
 let weekDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 let format_date = function(date){
@@ -166,11 +167,11 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
       })
     })
   })
-
+  console.log('run once');
   this.HightLightRowRect = this.container.append('rect').attr('fill', 'none')
-    .attr('stroke', 'red').attr('width', this.svgWidth - this.margin['left']- this.margin['right']).attr('height', unitWidth).attr('stroke-width', 0);
+    .attr('stroke', '#fd8d3c').attr('width', this.svgWidth - this.margin['left']- this.margin['right']).attr('height', unitWidth).attr('stroke-width', 0);
   this.HightLightColumnRect = this.container.append('rect').attr('fill', 'none')
-    .attr('stroke', 'red').attr('width', unitWidth).attr('height', this.svgHeight - this.margin['top'] - this.margin['bottom']).attr('stroke-width', 0);
+    .attr('stroke', '#fd8d3c').attr('width', unitWidth).attr('height', this.svgHeight - this.margin['top'] - this.margin['bottom']).attr('stroke-width', 0);
 };
 
 FeatureHeatmap.prototype.on = function(msg, func){
@@ -189,8 +190,10 @@ FeatureHeatmap.prototype.onMouseInter = function(msg){
   let dataObj = this.stationTimeMap[stationId][timestamp]
   let element = dataObj['e'];
 
-  this.HightLightRowRect.attr('y', dataObj['y']).attr('stroke-width', 1);
-  this.HightLightColumnRect.attr('x', dataObj['x']).attr('stroke-width', 1);
+
+
+  this.HightLightRowRect.attr('y', dataObj['y']).attr('stroke-width', 0.5);
+  this.HightLightColumnRect.attr('x', dataObj['x']).attr('stroke-width', 0.5);
 
   // if(msg['action'] == 'over'){
   //   d3.select(element).select('rect').attr('stroke', 'red');

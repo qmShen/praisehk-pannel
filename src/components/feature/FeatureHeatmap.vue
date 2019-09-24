@@ -5,7 +5,6 @@
   <!--</div>-->
   <div style="display: block; position: relative" class="boundary">
     <div class="mini_head">{{item.feature}}</div>
-
   </div>
 
 </template>

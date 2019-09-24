@@ -9,7 +9,7 @@
                v-bind:currentTime="currentTime"
                v-loading="MeteMapLoading"
                element-loading-text="Loading"
-               element-loading-background="rgba(0, 0, 0, 0.5)"
+               element-loading-background="rgba(0, 0, 0, 0.7)"
                style="height: 50%; width: 100%"
         />
         <MeteMap v-bind:stations="meteStations"
@@ -21,15 +21,34 @@
                  v-bind:currentTime="currentTime"
                  v-loading="AQMapLoading"
                  element-loading-text="Loading"
-                 element-loading-background="rgba(0, 0, 0, 0.5)"
+                 element-loading-background="rgba(0, 0, 0, 0.7)"
                  style="height: 50%; width: 100%"/>
       </el-col>
       <el-col :span="16" class="right">
-        <BrushPannel v-bind:featureValues='featureValues' style="width: 100%; height: 8%;" class="boundary"/>
-        <TargetFeatureValue style="width: 100%; height: 17%;" class="boundarys"/>
-        <FeatureHeatmap style="width: 100%; height: calc(100% / 4);" v-for="item in featureValues" v-bind:item="item" v-bind:key="item.feature">
-          {{item.feature}}
-        </FeatureHeatmap>
+        <BrushPannel v-bind:featureValues='featureValues' style="width: 100%; height: 8%;" class="boundary"
+                     v-loading="AQMapLoading"
+                     element-loading-background="rgba(0, 0, 0, 0.4)"
+        />
+        <TargetFeatureValue style="width: 100%; height: 17%; position: relative" class="boundary"
+                            v-loading="AQMapLoading"
+                            element-loading-text="Loading"
+                            element-loading-background="rgba(0, 0, 0, 0.4)"
+        >
+          <div style="position: absolute; right: 10px; top: 25px" >
+            <el-button type="success" icon="el-icon-video-play" size="mini"  v-bind:disabled="buttonDisable" v-on:click="playAnimation" plain></el-button>
+            <el-button type="success"  icon="el-icon-video-pause" size="mini"  v-bind:disabled="buttonDisable" v-on:click="stopAnimation" plain></el-button>
+          </div>
+        </TargetFeatureValue>
+        <div style="width: 100%; height: calc(75%); " class="boundary"
+             v-loading="FeatureValueLoading"
+             element-loading-text="Loading"
+             element-loading-background="rgba(0, 0, 0, 0.4)"
+        >
+          <FeatureHeatmap style="width: 100%; height: calc(100% / 3);" v-for="item in featureValues" v-bind:item="item" v-bind:key="item.feature"
+          >
+            {{item.feature}}
+          </FeatureHeatmap>
+        </div>
       </el-col>
     </el-row>
   </div>
@@ -69,8 +88,13 @@
                 timeRange:[],
                 AQMapLoading: true,
                 MeteMapLoading: true,
+                FeatureValueLoading: true,
                 AQDataN: 0,
-                MeteDataN: 0
+                MeteDataN: 0,
+
+                timeHandler:null,
+                buttonDisable: false,
+                mapReadyN:0
 
 
             }
@@ -81,6 +105,7 @@
             * */
             dataService.loadFeatureData((data)=>{
                 this.featureValues = data;
+                this.FeatureValueLoading = false;
             });
             // Version -1 ending
 
@@ -88,13 +113,16 @@
             * Previous version 0
             * */
             pipeService.onTimeRangeSelected(range=>{
+
                 this.AQMapLoading = true;
                 this.MeteMapLoading = true;
+                this.FeatureValueLoading = true;
 
                 console.log('timerange selected', range);
                 this.timeRange = range;
                 this.AQDataN = 0;
                 this.MeteDataN = 0;
+                this.mapReadyN = 0;
                 para = {'ids': 'all', 'feature': 'PM25', 'timeRange': 1, 'startTime': range[0], 'endTime': range[1]}
                 dataService.loadFeatureValue(para, (data)=>{
                     this.AQFeatureValue = data;
@@ -140,41 +168,7 @@
             });
 
             let para = null;
-            /*
-            * Load PM25 CMAQ and observation value
-            * */
-            // para = {'ids': 'all', 'feature': 'PM25', 'timeRange': 1}
-            // dataService.loadFeatureValue(para, (data)=>{
-            //     this.AQFeatureValue = data;
-            // });
-            //
-            // dataService.loadModelValue(para, (data)=>{
-            //     this.CMAQFeatureValue = data;
-            // });
 
-            /*
-           * Load Wind WRF and observation value
-           * */
-            // para = {'ids': 'all', 'feature': 'wind', 'timeRange': 1}
-            // dataService.loadFeatureValue(para, (data)=>{
-            //     this.WindFeatureValue = data;
-            // });
-            //
-            // dataService.loadModelValue(para, (data)=>{
-            //     this.WindWRFFeatureValue = data;
-            // });
-
-            /*
-            * Load Winddir WRF and observation value
-            * */
-            // para = {'ids': 'all', 'feature': 'winddir', 'timeRange': 1}
-            // dataService.loadFeatureValue(para, (data)=>{
-            //     this.WindDirFeatureValue = data;
-            // });
-            //
-            // dataService.loadModelValue(para, (data)=>{
-            //     this.WindDirWRFFeatureValue = data;
-            // });
 
             // version 0 --- end
             pipeService.onMouseOverCell(msg=>{
@@ -189,16 +183,7 @@
                 }else if(msg['action'] == 'over'){
                     this.currentTime = msg['timestamp'];
                     let i = 0;
-                    // let hand = setInterval(function(){
-                    //     i+=1;
-                    //     if(i > 10){
-                    //         clearInterval(hand);
-                    //     }
-                    //     this.currentTime  = this.currentTime + 3600;
-                    //     if(this.currentTime >= this.timeRange[1]){
-                    //         clearInterval(hand);
-                    //     }
-                    // }, 1000)
+
                 }
             })
         },
@@ -206,14 +191,44 @@
             AQDataN:function(n){
                 if(n == 2){
                     this.AQMapLoading = false;
+                    this.mapReadyN += 1;
                 }
             },
             MeteDataN:function(n){
                 if(n == 4){
                     this.MeteMapLoading = false;
+                    this.FeatureValueLoading = false;
+                    this.mapReadyN += 1;
+                }
+            },
+            mapReadyN: function(n){
+                if(n == 2){
+                    this.buttonDisable = false
+                }else{
+                    this.buttonDisable = true
                 }
             }
         },
+        methods:{
+            playAnimation:function(){
+                this.timeHandler = setInterval(()=>{
+                    this.currentTime  = this.currentTime + 3600;
+                    if(this.currentTime >= this.timeRange[1]){
+                        clearInterval(this.timeHandler);
+                    }
+                    console.log('222')
+
+                }, 1000)
+            },
+            stopAnimation: function(){
+                if(this.timeHandler){
+                    console.log('rrr', this.timeHandler)
+                    clearInterval(this.timeHandler);
+                }
+
+            }
+        },
+
         components:{
             AQMap,
             MeteMap,

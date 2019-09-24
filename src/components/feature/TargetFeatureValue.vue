@@ -1,6 +1,7 @@
 <template>
   <div class="boundary">
     <div class="mini_head">Obs VS CMAQ</div>
+    <slot></slot>
   </div>
 </template>
 
