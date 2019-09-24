@@ -3,7 +3,7 @@
   <!--<div style="height: 100%; width: 100%" id='map_container'></div>-->
   <!--<div style="position:absolute; left: 0px; top:0px; z-index: 999; font-size: 10px" >Model Name: {{model_name}}</div>-->
   <!--</div>-->
-  <div style="display: block; position: relative" class="boundary">
+  <div style="display: block; position: relative" class="boundary" >
     <div class="mini_head">Map</div>
     <!--    <el-checkbox size="mini">Match</el-checkbox> <el-checkbox size="mini">Mete</el-checkbox> <el-checkbox size="mini">AQ</el-checkbox>-->
     <div style="height: calc(100%  - 20px); width: 100%; position: relative">
@@ -30,7 +30,9 @@
                     'station_name': 'Kwai Chung ' + 'Station',
                     'location':[22.3586, 114.1271]
                 },
-                type: 'AQ'
+                type: 'AQ',
+                loading: false,
+
             }
         },
         mounted: function(){
@@ -42,7 +44,7 @@
                     console.log('click')
                 }
                 else if(msg['action'] == 'over'){
-                    this.handler.setCurrentTimestamp(msg);
+                    // this.handler.setCurrentTimestamp(msg);
                 }else if(msg['action'] == 'out'){
                     // this.handler.mouseoutCircle(msg);
                 }
@@ -62,9 +64,9 @@
             CMAQFeatureValue: function(new_data){
                 this.handler.loadCMAQValue(new_data);
             },
-            // currentTime: function(t){
-            //     this.handler.setCurrentTimestamp({'timestamp'};
-            // }
+            currentTime: function(t){
+                this.handler.setCurrentTimestamp({'timestamp':t});
+            }
         },
         methods:{
             clickOnStation(msg){

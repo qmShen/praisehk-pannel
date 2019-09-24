@@ -363,12 +363,15 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
     let _endAngle = null;
 
     let outer = 0;
+    let inner = 0;
     let color =  null;
     if(lWRF > lWind){
-      outer = lWind;
+      outer = lWRF;
+      inner = lWind;
       color = '#d77451';
     }else{
-      outer = lWRF;
+      outer = lWind;
+      inner = lWRF;
       color = '#479886';
     }
 
@@ -388,14 +391,22 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
       endAngle = startAngle;
       startAngle = _;
     }
+    // var arc = d3.arc()
+    //   .outerRadius(outer)
+    //   .innerRadius(inner)
+    //   .startAngle(startAngle)
+    //   .endAngle(startAngle);
+    //
+    // d3.select(this.idMap[id]['render']['WindArc']).attr("d", arc).attr('fill', color).attr('fill-opacity', 0.5).attr('stroke', color).attr('stroke-opacity', 0.5)
+
     var arc = d3.arc()
       .outerRadius(outer)
-      .innerRadius(0)
+      .innerRadius(inner)
       .startAngle(startAngle)
       .endAngle(endAngle);
 
-    d3.select(this.idMap[id]['render']['WindArc']).attr("d", arc).attr('fill', color).attr('fill-opacity', 0.5).attr('stroke', 'none')
-
+    d3.select(this.idMap[id]['render']['WindArc']).attr("d", arc).attr('fill', color).attr('fill-opacity', 0).attr('stroke', color).attr('stroke-opacity', 0);
+    d3.select(this.idMap[id]['render']['WindArc']).transition().attr('fill-opacity', 0.5).attr('stroke-opacity', 0.5);
   }
 
   if(valid(windData) && valid(windDirData)){

@@ -41,7 +41,7 @@
                     // console.log('click')
                 }
                 else if(msg['action'] == 'over'){
-                    this.handler.setCurrentTimestamp(msg);
+                    // this.handler.setCurrentTimestamp(msg);
                 }else if(msg['action'] == 'out'){
                     // this.handler.mouseoutCircle(msg);
                 }
@@ -77,9 +77,9 @@
             WindDirWRFFeatureValue: function(new_data){
                 this.handler.loadWindDirWRFValue(new_data);
             },
-            // currentTime: function(t){
-            //     this.handler.setCurrentTimestamp({'timestamp':t});
-            // }
+            currentTime: function(t){
+                this.handler.setCurrentTimestamp({'timestamp':t});
+            }
         },
         methods:{
             clickOnStation(msg){
