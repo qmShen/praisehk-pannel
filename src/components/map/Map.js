@@ -22,7 +22,7 @@ let Map = function(el, el_svg, ceneterLoc, featureType) {
   }).addTo(this.map);
 
   this.svg = d3.select('#' + el_svg);
-
+  this.signLoadData = false;
   this.initializeVisualization();
 };
 
@@ -32,6 +32,18 @@ Map.prototype.focus = function(loc){
 };
 
 Map.prototype.mouseoverCircle = function(msg){
+  if(this.featureType == 'AQ'){
+    this.showAQCMAQ(msg);
+  }else if(this.featureType == 'Mete'){
+    this.showMeteWRF(msg);
+  }
+};
+
+Map.prototype.setCurrentTimestamp = function(msg){
+  // if(this.signLoadData == false){
+  //   console.log('No data initialized');
+  //   return
+  // }
   if(this.featureType == 'AQ'){
     this.showAQCMAQ(msg);
   }else if(this.featureType == 'Mete'){
@@ -50,6 +62,9 @@ Map.prototype.initializeVisualization = function(){
 };
 Map.prototype.showAQCMAQ = function(msg){
   let timestamp = msg['timestamp'];
+  if(this.timeStationMapAQ == undefined ||this.timeStationMapCMAQ == undefined){
+    return;
+  }
   let AQData = this.timeStationMapAQ[timestamp];
   let CMAQData = this.timeStationMapCMAQ[timestamp];
   for(let id in this.idMap){
@@ -321,7 +336,9 @@ Map.prototype.loadWindDirWRFValue = function(data){
 
 
 Map.prototype.showMeteWRF = function(msg){
-
+  if(this.timeStationMapWind == undefined ||this.timeStationMapWindDir == undefined ||this.timeStationMapWindWRF == undefined ||this.timeStationMapWindDirWRF == undefined){
+    return
+  }
   let timestamp = msg['timestamp'];
   let WindData = this.timeStationMapWind[timestamp];
   let WindDirData = this.timeStationMapWindDir[timestamp];
@@ -340,18 +357,21 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
     d3.select(this.idMap[id]['render']['WindArc']);
     let lWRF = this.windScale(windWRFData);
     let lWind = this.windScale(windData);
-    let _windDir = windDirData + 180;
-    let _windWRFDir = windDirWRFData + 180;
+    let _windDir = (windDirData + 180) % 360;
+    let _windWRFDir = (windDirWRFData + 180) % 360;
     let _startAngle = null;
     let _endAngle = null;
 
     let outer = 0;
+    let inner = 0;
     let color =  null;
     if(lWRF > lWind){
-      outer = lWind;
+      outer = lWRF;
+      inner = lWind;
       color = '#d77451';
     }else{
-      outer = lWRF;
+      outer = lWind;
+      inner = lWRF;
       color = '#479886';
     }
 
@@ -363,22 +383,20 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
       _endAngle = _windWRFDir;
     }
 
+    if(_endAngle - _startAngle > 180){
+      _endAngle = _endAngle - 360;
+    }
     let startAngle = _startAngle  / 180 * Math.PI;
     let endAngle = _endAngle  / 180 * Math.PI;
 
-    if(endAngle - startAngle > 180){
-      let _ = endAngle;
-      endAngle = startAngle;
-      startAngle = _;
-    }
     var arc = d3.arc()
       .outerRadius(outer)
-      .innerRadius(0)
+      .innerRadius(inner)
       .startAngle(startAngle)
       .endAngle(endAngle);
 
-    d3.select(this.idMap[id]['render']['WindArc']).attr("d", arc).attr('fill', color).attr('fill-opacity', 0.5).attr('stroke', 'none')
-
+    d3.select(this.idMap[id]['render']['WindArc']).attr("d", arc).attr('fill', color).attr('fill-opacity', 0).attr('stroke', color).attr('stroke-opacity', 0);
+    d3.select(this.idMap[id]['render']['WindArc']).transition().attr('fill-opacity', 0.5).attr('stroke-opacity', 0.5);
   }
 
   if(valid(windData) && valid(windDirData)){

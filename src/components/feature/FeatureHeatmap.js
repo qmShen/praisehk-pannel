@@ -4,6 +4,7 @@
 
 
 import * as d3 from "d3";
+
 let weekDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 let format_date = function(date){
@@ -14,16 +15,19 @@ let format_date = function(date){
   return string;
 };
 
-
-let FeatureHeatmap = function(el, featureObj) {
+let FeatureHeatmap = function(el,featureObj) {
 
   this.$el = el;
   this.svgWidth = this.$el.clientWidth ;
   this.svgHeight = this.$el.clientHeight;
   this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
-  // this.margin = {'top': 20,'bottom': 0, 'left': 0, 'right':0};
-   this.margin = {'top': 20,'bottom': 20, 'left': 40, 'right':0};
+
+  this.margin = {'top': 20,'bottom': 20, 'left': 40, 'right':0};
   // initial data
+  this.update(featureObj);
+};
+
+FeatureHeatmap.prototype.update = function(featureObj){
   let _value = featureObj['value'];
   if(_value.length == 0){
     console.log('No data collected!')
@@ -42,39 +46,43 @@ let FeatureHeatmap = function(el, featureObj) {
   // console.log('station_ids', this.valueArray)
   this.renderHeatmap()
 };
-FeatureHeatmap.prototype.colors = ["#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb",
-  "#41b6c4", "#1d91c0", "#225ea8", "#253494",
-  "#081d58"];
 
-FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
+FeatureHeatmap.prototype.colors = [
+  "#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb",
+  "#41b6c4", "#1d91c0", "#225ea8", "#253494",
+  "#081d58"
+];
+
+FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
   // Hard code
   let _this = this;
-
   this.stationTimeMap = {};
-
   let rowHeight = (this.svgHeight - this.margin['top'] - this.margin['bottom']) / this.station_list.length;
   let unitWidth = rowHeight;
   // hard code
 
-  start_time = start_time == undefined ?this.valueArray[0].timestamp: start_time;
-  end_time = end_time == undefined ? this.valueArray[parseInt(this.svgWidth / unitWidth)].timestamp: end_time;
+  // start_time = start_time == undefined ?this.valueArray[0].timestamp: start_time;
+  // end_time = end_time == undefined ? this.valueArray[parseInt(this.svgWidth / unitWidth)].timestamp: end_time;
   this.svg.selectAll('g').remove();
   this.container = this.svg.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
 
+
+  valueArray = valueArray == undefined ? this.valueArray : valueArray;
   let rowContainer = this.container.selectAll('.row').data(this.station_list).enter().append('g').attr('class', 'row')
     .attr('transform',(d, i) => 'translate('+[0,rowHeight * i] + ')');
 
 
   let renderList = [];
-  this.valueArray.forEach((d,i)=>{
-    if(d.timestamp > start_time && d.timestamp < end_time){
-      renderList.push(d)
-    }
+  valueArray.forEach((d,i)=>{
+    // if(d.timestamp > start_time && d.timestamp < end_time){
+    //   renderList.push(d)
+    // }
+    renderList.push(d)
   });
 
   let _maxArray = [];
   this.station_list.forEach(station_id=>{
-    _maxArray.push(d3.max(this.valueArray, d=>d[station_id]));
+    _maxArray.push(d3.max(valueArray, d=>d[station_id]));
   });
 
   let maxFeaturValue = d3.max(_maxArray);
@@ -97,27 +105,31 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
     maxFeaturValue = 180;
   }
   let colorScale = d3.scaleQuantile()
-    // .domain([0, colorBucketes - 1, maxFeaturValue])
+  // .domain([0, colorBucketes - 1, maxFeaturValue])
     .domain(domain)
     .range(this.colors);
 
 
-  rowContainer.each(function(stationId){
+  rowContainer.each(function(stationId, row_i){
 
     let _container = d3.select(this);
     if(_this.stationTimeMap[stationId] == undefined){
       _this.stationTimeMap[stationId] = {}
     }
-    // _container.append('rect').attr('width', _this.svgWidth).attr('height', rowHeight).attr('stroke', 'red').attr('fill', 'none').attr('stroke-width', 0.3);
-
     let featureRange = d3.extent(renderList, d=>d[stationId]);
-
 
     let cell_containers = _container.selectAll('.cell').data(renderList).enter().append('g').attr('class', 'cell')
       .attr('transform', d => 'translate(' + [xScale(d.timestamp), 0] + ')')
 
-    cell_containers.each(function(d){
-      _this.stationTimeMap[stationId][d.timestamp] = this;
+    cell_containers.each(function(d, col_j){
+      if(_this.stationTimeMap[stationId][d.timestamp] == undefined){
+        _this.stationTimeMap[stationId][d.timestamp] = {};
+      }
+      _this.stationTimeMap[stationId][d.timestamp]['e'] = this;
+      _this.stationTimeMap[stationId][d.timestamp]['x'] = xScale(d.timestamp);
+      _this.stationTimeMap[stationId][d.timestamp]['y'] = row_i*rowHeight;
+
+
     });
     let rects = cell_containers.append('rect')
       .attr('width',unitWidth)
@@ -140,6 +152,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
       else{
         value = parseInt(value * 100) / 100;
       }
+      return d.timestamp;
       return 'Id: '+ stationId + ' error: ' + value + '\n timestamp: ' + format_date(new Date(d.timestamp * 1000));
     });
     rects.on('mouseover', function(d){
@@ -161,6 +174,11 @@ FeatureHeatmap.prototype.renderHeatmap = function(start_time, end_time){
       })
     })
   })
+  console.log('run once');
+  this.HightLightRowRect = this.container.append('rect').attr('fill', 'none')
+    .attr('stroke', '#fd8d3c').attr('width', this.svgWidth - this.margin['left']- this.margin['right']).attr('height', unitWidth).attr('stroke-width', 0);
+  this.HightLightColumnRect = this.container.append('rect').attr('fill', 'none')
+    .attr('stroke', '#fd8d3c').attr('width', unitWidth).attr('height', this.svgHeight - this.margin['top'] - this.margin['bottom']).attr('stroke-width', 0);
 };
 
 FeatureHeatmap.prototype.on = function(msg, func){
@@ -171,26 +189,32 @@ FeatureHeatmap.prototype.on = function(msg, func){
   }else if(msg == 'click'){
     this.click = func;
   }
-
 };
 
 FeatureHeatmap.prototype.onMouseInter = function(msg){
   let timestamp = msg['timestamp'];
   let stationId = msg['stationId'];
-  let element = this.stationTimeMap[stationId][timestamp];
-
-  if(msg['action'] == 'over'){
-    d3.select(element).select('rect').attr('stroke', 'red');
-    // element.parentNode.appendChild(element);
-    // element.parentNode.parentNode.appendChild(element.parentNode);
-  }else if(msg['action'] == 'out'){
-    d3.select(element).select('rect').attr('stroke', 'white');
+  let dataObj = this.stationTimeMap[stationId][timestamp]
+  if(dataObj == undefined){
+    return
   }
+  // let element = dataObj['e'];
+
+
+  this.HightLightRowRect.attr('y', dataObj['y']).attr('stroke-width', 0.5);
+  this.HightLightColumnRect.attr('x', dataObj['x']).attr('stroke-width', 0.5);
+
+  // if(msg['action'] == 'over'){
+  //   d3.select(element).select('rect').attr('stroke', 'red');
+  // }else if(msg['action'] == 'out'){
+  //   d3.select(element).select('rect').attr('stroke', 'white');
+  // }
 };
+
 
 FeatureHeatmap.prototype.updateByTimeRange = function(timeRange){
   this.renderHeatmap(timeRange[0], timeRange[1]);
-}
+};
 
 
 

@@ -33,9 +33,9 @@ function loadRegions(callback){
 }
 
 
-function loadFeatureData(callback){
+function loadFeatureData(param, callback){
   const url = `${dataServerUrl}/feature_data`
-  $http.get(url).then(response => {
+  $http.post(url, param).then(response => {
     callback(response.data)
   }, errResponse => {
     console.log(errResponse)

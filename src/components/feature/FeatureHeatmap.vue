@@ -5,7 +5,6 @@
   <!--</div>-->
   <div style="display: block; position: relative" class="boundary">
     <div class="mini_head">{{item.feature}}</div>
-
   </div>
 
 </template>
@@ -23,6 +22,10 @@
         },
 
         watch:{
+            item:function(){
+                console.log('item changed', this.item);
+                this.handler.update(this.item)
+            }
         },
         mounted: function(){
             console.log('item', this.item);
