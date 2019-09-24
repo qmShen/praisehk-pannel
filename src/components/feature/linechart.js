@@ -17,14 +17,11 @@ function toDateTime(secs) {
   return new Date(parseInt(secs) * 1000);
 }
 
-BrushLineChart.prototype.update_render = function(data){
+BrushLineChart.prototype.set_currentTIme = function(data){
 
 
 };
 
-BrushLineChart.prototype.setInteraction = function(model, method){
-
-};
 
 BrushLineChart.prototype.setTimeRange = function(timerange){
   this.timerange = timerange;
