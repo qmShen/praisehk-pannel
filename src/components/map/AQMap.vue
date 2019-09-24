@@ -21,7 +21,7 @@
 
     export default {
         name: "Map",
-        props:['stations', 'centerLoc', 'AQFeatureValue', 'CMAQFeatureValue'],
+        props:['stations', 'centerLoc', 'AQFeatureValue', 'CMAQFeatureValue', 'currentTime'],
         data() {
             return {
                 featureType: 'AQ',
@@ -42,9 +42,9 @@
                     console.log('click')
                 }
                 else if(msg['action'] == 'over'){
-                    this.handler.mouseoverCircle(msg);
+                    this.handler.setCurrentTimestamp(msg);
                 }else if(msg['action'] == 'out'){
-                    this.handler.mouseoutCircle(msg);
+                    // this.handler.mouseoutCircle(msg);
                 }
             });
 
@@ -61,7 +61,10 @@
             },
             CMAQFeatureValue: function(new_data){
                 this.handler.loadCMAQValue(new_data);
-            }
+            },
+            // currentTime: function(t){
+            //     this.handler.setCurrentTimestamp({'timestamp'};
+            // }
         },
         methods:{
             clickOnStation(msg){

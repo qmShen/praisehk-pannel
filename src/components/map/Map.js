@@ -22,7 +22,7 @@ let Map = function(el, el_svg, ceneterLoc, featureType) {
   }).addTo(this.map);
 
   this.svg = d3.select('#' + el_svg);
-
+  this.signLoadData = false;
   this.initializeVisualization();
 };
 
@@ -32,6 +32,18 @@ Map.prototype.focus = function(loc){
 };
 
 Map.prototype.mouseoverCircle = function(msg){
+  if(this.featureType == 'AQ'){
+    this.showAQCMAQ(msg);
+  }else if(this.featureType == 'Mete'){
+    this.showMeteWRF(msg);
+  }
+};
+
+Map.prototype.setCurrentTimestamp = function(msg){
+  // if(this.signLoadData == false){
+  //   console.log('No data initialized');
+  //   return
+  // }
   if(this.featureType == 'AQ'){
     this.showAQCMAQ(msg);
   }else if(this.featureType == 'Mete'){
