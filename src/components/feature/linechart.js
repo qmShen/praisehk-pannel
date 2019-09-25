@@ -110,7 +110,6 @@ BrushLineChart.prototype.setCurrentTimestamp = function(t){
   if(this.data == undefined || this.data == null || this.currentTimeLine == undefined){
       return
   }
-  console.log('rrrrr', t);
   let x = this.xScale(new Date(t * 1000));
   this.currentTimeLine.style("stroke", '#984a23').attr('stroke-width', 1)
     .attr("x1", x).attr("y1", this.margin['top']).attr("x2", x).attr("y2", this.svgHeight - this.margin['bottom']);

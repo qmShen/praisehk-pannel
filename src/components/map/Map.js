@@ -8,7 +8,7 @@ import 'leaflet/dist/leaflet.css'
 let HongKongStationList = [67, 68, 70, 74, 77, 78, 79, 80, 81, 82, 83, 84, 85, 87, 89, 90];
 let Map = function(el, el_svg, ceneterLoc, featureType) {
   // console.log('leaflet', leaflet)
-  this.map = L.map(el, { zoomControl:false }).setView(ceneterLoc.loc, 8);
+  this.map = L.map(el, { zoomControl:false }).setView(ceneterLoc.loc, 9);
   this.featureType = featureType;
   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
     maxZoom: 24,
