@@ -7,6 +7,8 @@ import * as d3 from "d3";
 
 let weekDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+let HongKongStationList = [67, 68, 70, 74, 77, 78, 79, 80, 81, 82, 83, 84, 85, 87, 89, 90];
+
 let format_date = function(date){
   let month = date.getMonth() >= 9?date.getMonth() + 1:'0' + (date.getMonth() + 1);
   let day = date.getDate() >= 10?date.getDate():'0' + date.getDate();
@@ -25,6 +27,9 @@ let FeatureHeatmap = function(el,featureObj) {
   this.margin = {'top': 20,'bottom': 20, 'left': 40, 'right':0};
   // initial data
   this.update(featureObj);
+
+  this.HongKongSatationIdMap = {};
+
 };
 
 FeatureHeatmap.prototype.update = function(featureObj){
@@ -44,6 +49,13 @@ FeatureHeatmap.prototype.update = function(featureObj){
   this.feature = featureObj['feature'];
   this.valueArray = featureObj['value'];
   // console.log('station_ids', this.valueArray)
+  this.HongKongSatationIdMap = {};
+  if(this.feature == 'PM25'){
+    HongKongStationList.forEach(d=>{
+      this.HongKongSatationIdMap[d] = true;
+    })
+  }
+
   this.renderHeatmap()
 };
 
@@ -113,6 +125,12 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
   rowContainer.each(function(stationId, row_i){
 
     let _container = d3.select(this);
+
+    if(_this.HongKongSatationIdMap[stationId] == true){
+      _container.append('circle').attr('cx', -1 * 1 * unitWidth).attr('cy', unitWidth / 2).attr('r',unitWidth / 3).attr('fill','grey')
+    }
+
+
     if(_this.stationTimeMap[stationId] == undefined){
       _this.stationTimeMap[stationId] = {}
     }
@@ -152,7 +170,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
       else{
         value = parseInt(value * 100) / 100;
       }
-      return d.timestamp;
+      // return d.timestamp;
       return 'Id: '+ stationId + ' error: ' + value + '\n timestamp: ' + format_date(new Date(d.timestamp * 1000));
     });
     rects.on('mouseover', function(d){

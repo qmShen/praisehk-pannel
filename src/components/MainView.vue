@@ -40,7 +40,10 @@
           </div>
         </TargetFeatureValue>
         <div style="width: 100%; height: calc(75%); " class="boundary"
-
+             v-loading="AQMapLoading"
+             v-bind:currentTime="currentTime"
+             element-loading-text="Loading"
+             element-loading-background="rgba(0, 0, 0, 0.4)"
         >
           <FeatureHeatmap style="width: 100%; height: calc(100% );" v-for="item in featureValues" v-bind:item="item" v-bind:key="item.feature"
           >

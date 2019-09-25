@@ -5,7 +5,7 @@
 import L from "leafLet"
 import * as d3 from "d3";
 import 'leaflet/dist/leaflet.css'
-
+let HongKongStationList = [67, 68, 70, 74, 77, 78, 79, 80, 81, 82, 83, 84, 85, 87, 89, 90];
 let Map = function(el, el_svg, ceneterLoc, featureType) {
   // console.log('leaflet', leaflet)
   this.map = L.map(el, { zoomControl:false }).setView(ceneterLoc.loc, 8);
@@ -24,6 +24,13 @@ let Map = function(el, el_svg, ceneterLoc, featureType) {
   this.svg = d3.select('#' + el_svg);
   this.signLoadData = false;
   this.initializeVisualization();
+
+  this.HongKongSatationIdMap = {};
+  if(this.featureType == "AQ"){
+    HongKongStationList.forEach(d=>{
+      this.HongKongSatationIdMap[d] = true
+    })
+  }
 };
 
 Map.prototype.focus = function(loc){
@@ -128,6 +135,7 @@ Map.prototype.loadStations = function(stations){
   stationCircles.each(function(d){
     d['render']['stationCircle'] = this;
   });
+
 
   if(this.featureType == 'AQ'){
     let CMAQCircles = this.stationsContainers.append('circle').attr('r', 0)
