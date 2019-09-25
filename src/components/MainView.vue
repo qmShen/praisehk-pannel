@@ -41,7 +41,7 @@
         <div style="width: 100%; height: calc(75%); " class="boundary"
 
         >
-          <FeatureHeatmap style="width: 100%; height: calc(100% / 3);" v-for="item in featureValues" v-bind:item="item" v-bind:key="item.feature"
+          <FeatureHeatmap style="width: 100%; height: calc(100% );" v-for="item in featureValues" v-bind:item="item" v-bind:key="item.feature"
           >
             {{item.feature}}
           </FeatureHeatmap>
