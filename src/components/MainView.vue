@@ -122,13 +122,12 @@
                 this.mapReadyN = 0;
                 para = {'ids': 'all', 'feature': 'PM25', 'timeRange': 1, 'startTime': range[0], 'endTime': range[1]}
                 dataService.loadFeatureValue(para, (data)=>{
-                    console.log('AQ feature Value', data);
                     this.AQFeatureValue = data;
                     this.AQDataN += 1;
                 });
 
                 dataService.loadModelValue(para, (data)=>{
-                    console.log('CMAQ feature Value', data);
+
                     this.CMAQFeatureValue = data;
                     this.AQDataN += 1;
                 });
