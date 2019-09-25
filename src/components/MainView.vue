@@ -30,6 +30,7 @@
         />
         <TargetFeatureValue style="width: 100%; height: 17%; position: relative" class="boundary"
                             v-loading="AQMapLoading"
+                            v-bind:currentTime="currentTime"
                             element-loading-text="Loading"
                             element-loading-background="rgba(0, 0, 0, 0.4)"
         >

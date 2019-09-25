@@ -13,7 +13,7 @@
     import dataService from '../../service/dataService.js'
     export default {
         name: "LineChart",
-
+        props:["currentTime"],
         mounted:function(){
             this.LineChart = new BrushLineChart(this.$el);
 
@@ -30,15 +30,17 @@
 
         },
         watch:{
-
+            currentTime(t){
+                this.LineChart.setCurrentTimestamp(t);
+            }
         },
         methods:{
             queryModelObs(stationId){
                 dataService.loadCMAQOBSData(stationId, d=>{
                     this.LineChart.setData(d);
                 })
+            },
 
-            }
         }
     }
 </script>
