@@ -1,6 +1,7 @@
 <template>
   <div class="boundary">
     <div class="mini_head">Obs VS CMAQ</div>
+    <slot></slot>
   </div>
 </template>
 
@@ -12,7 +13,7 @@
     import dataService from '../../service/dataService.js'
     export default {
         name: "LineChart",
-
+        props:["currentTime"],
         mounted:function(){
             this.LineChart = new BrushLineChart(this.$el);
 
@@ -29,15 +30,17 @@
 
         },
         watch:{
-
+            currentTime(t){
+                this.LineChart.setCurrentTimestamp(t);
+            }
         },
         methods:{
             queryModelObs(stationId){
                 dataService.loadCMAQOBSData(stationId, d=>{
                     this.LineChart.setData(d);
                 })
+            },
 
-            }
         }
     }
 </script>

@@ -17,14 +17,11 @@ function toDateTime(secs) {
   return new Date(parseInt(secs) * 1000);
 }
 
-BrushLineChart.prototype.update_render = function(data){
+BrushLineChart.prototype.set_currentTIme = function(data){
 
 
 };
 
-BrushLineChart.prototype.setInteraction = function(model, method){
-
-};
 
 BrushLineChart.prototype.setTimeRange = function(timerange){
   this.timerange = timerange;
@@ -45,6 +42,8 @@ BrushLineChart.prototype.render = function(){
   var xExtent = d3.extent(data, d => d.time);
   var xScale = d3.scaleTime()
     .domain(xExtent).range([0, this.svgWidth - this.margin.right - this.margin.left]);
+
+  this.xScale = xScale;
   var xAxis = d3.axisBottom().scale(xScale);
 
   var yMax = d3.max([d3.max(data, d => d.val_aq), d3.max(data, d => d.val_cmaq)]);
@@ -78,13 +77,12 @@ BrushLineChart.prototype.render = function(){
     .attr('class', 'yAxis')
     .call(yAxis);
 
-  let obs_contaienr = this.container.append('g').attr('transform', 'translate(40,0)');
+  let obs_container = this.container.append('g').attr('transform', 'translate(40,0)');
 
-  obs_contaienr.selectAll('circle')
+  obs_container.selectAll('circle')
     .data(data).enter().append('circle')
     .attr('cx', d=>xScale(d.time))
     .attr('cy', d=>{
-      console.log('rrr', d.val_aq);
       if(d.val_aq == 'null' || d.val_aq == undefined){
         return yScale(this.yMax);
       }
@@ -97,11 +95,24 @@ BrushLineChart.prototype.render = function(){
       }
       return 'red'
     });
+
+
+  this.currentTimeLine = obs_container.append('line')
+    .attr('stroke-width', 0)
+    .attr("x1", 0).attr("y1",0).attr("x2", 0).attr("y2", 0);
 };
 BrushLineChart.prototype.setData = function(data){
-
   this.data  = data;
   this.render();
+};
+
+BrushLineChart.prototype.setCurrentTimestamp = function(t){
+  if(this.data == undefined || this.data == null || this.currentTimeLine == undefined){
+      return
+  }
+  let x = this.xScale(new Date(t * 1000));
+  this.currentTimeLine.style("stroke", '#984a23').attr('stroke-width', 1)
+    .attr("x1", x).attr("y1", this.margin['top']).attr("x2", x).attr("y2", this.svgHeight - this.margin['bottom']);
 
 };
 
