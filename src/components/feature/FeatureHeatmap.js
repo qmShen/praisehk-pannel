@@ -29,7 +29,6 @@ let FeatureHeatmap = function(el,featureObj) {
   this.update(featureObj);
 
   this.HongKongSatationIdMap = {};
-
 };
 
 FeatureHeatmap.prototype.update = function(featureObj){
@@ -67,8 +66,10 @@ FeatureHeatmap.prototype.colors = [
 
 FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
   // Hard code
+
   let _this = this;
   this.stationTimeMap = {};
+  this.stationMap = {};
   let rowHeight = (this.svgHeight - this.margin['top'] - this.margin['bottom']) / this.station_list.length;
   let unitWidth = rowHeight;
   // hard code
@@ -85,6 +86,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
 
 
   let renderList = [];
+  if(valueArray == undefined) return
   valueArray.forEach((d,i)=>{
     // if(d.timestamp > start_time && d.timestamp < end_time){
     //   renderList.push(d)
@@ -123,19 +125,16 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
 
 
   rowContainer.each(function(stationId, row_i){
-
     let _container = d3.select(this);
 
     if(_this.HongKongSatationIdMap[stationId] == true){
       _container.append('circle').attr('cx', -1 * 1 * unitWidth).attr('cy', unitWidth / 2).attr('r',unitWidth / 3).attr('fill','grey')
     }
 
-
     if(_this.stationTimeMap[stationId] == undefined){
       _this.stationTimeMap[stationId] = {}
     }
     let featureRange = d3.extent(renderList, d=>d[stationId]);
-
     let cell_containers = _container.selectAll('.cell').data(renderList).enter().append('g').attr('class', 'cell')
       .attr('transform', d => 'translate(' + [xScale(d.timestamp), 0] + ')')
 
@@ -146,9 +145,8 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
       _this.stationTimeMap[stationId][d.timestamp]['e'] = this;
       _this.stationTimeMap[stationId][d.timestamp]['x'] = xScale(d.timestamp);
       _this.stationTimeMap[stationId][d.timestamp]['y'] = row_i*rowHeight;
-
-
     });
+
     let rects = cell_containers.append('rect')
       .attr('width',unitWidth)
       .attr('height', rowHeight)
@@ -191,12 +189,19 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
         'stationId': stationId
       })
     })
-  })
-  console.log('run once');
+  });
+
   this.HightLightRowRect = this.container.append('rect').attr('fill', 'none')
     .attr('stroke', '#fd8d3c').attr('width', this.svgWidth - this.margin['left']- this.margin['right']).attr('height', unitWidth).attr('stroke-width', 0);
   this.HightLightColumnRect = this.container.append('rect').attr('fill', 'none')
     .attr('stroke', '#fd8d3c').attr('width', unitWidth).attr('height', this.svgHeight - this.margin['top'] - this.margin['bottom']).attr('stroke-width', 0);
+
+
+  let rowRects = rowContainer.append('rect').attr('fill', 'none')
+    .attr('stroke', 'red').attr('width', _this.svgWidth - _this.margin['left']- _this.margin['right']).attr('height', unitWidth).attr('stroke-width', 0);
+  rowRects.each(function(stationId){
+    _this.stationMap[stationId] = this;
+  })
 };
 
 FeatureHeatmap.prototype.on = function(msg, func){
@@ -217,11 +222,13 @@ FeatureHeatmap.prototype.onMouseInter = function(msg){
     return
   }
   // let element = dataObj['e'];
-
-
+  // for(let key in this.stationMap){
+  //   d3.select(this.stationMap[key]).attr('stroke-width', 0.0);
+  // }
+  // d3.select(this.stationMap[stationId]).attr('stroke-width', 0.5);
   this.HightLightRowRect.attr('y', dataObj['y']).attr('stroke-width', 0.5);
   this.HightLightColumnRect.attr('x', dataObj['x']).attr('stroke-width', 0.5);
-
+  // let element = dataObj['e'];
   // if(msg['action'] == 'over'){
   //   d3.select(element).select('rect').attr('stroke', 'red');
   // }else if(msg['action'] == 'out'){

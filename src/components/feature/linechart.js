@@ -44,10 +44,15 @@ BrushLineChart.prototype.render = function(){
     .domain(xExtent).range([0, this.svgWidth - this.margin.right - this.margin.left]);
 
   this.xScale = xScale;
-  var xAxis = d3.axisBottom().scale(xScale);
+  var xAxis = d3.axisBottom().scale(xScale).tickFormat(d=>{
+    // console.log('ddd', d, typeof (d));
+    return   d.getFullYear() + '/' + d.getMonth() + '/' + d.getDate() + ' ' +  d.getHours() + ":00"
+    // return d
+  })
 
   var yMax = d3.max([d3.max(data, d => d.val_aq), d3.max(data, d => d.val_cmaq)]);
   this.yMax = yMax;
+  this.yMax = 100; // Given by domain expert
   var yScale = d3.scaleLinear()
     .domain([0, yMax]).range([this.svgHeight - this.margin.bottom, this.margin.top]);
   var yAxis = d3.axisLeft().scale(yScale);
@@ -108,7 +113,7 @@ BrushLineChart.prototype.setData = function(data){
 
 BrushLineChart.prototype.setCurrentTimestamp = function(t){
   if(this.data == undefined || this.data == null || this.currentTimeLine == undefined){
-      return
+    return
   }
   let x = this.xScale(new Date(t * 1000));
   this.currentTimeLine.style("stroke", '#984a23').attr('stroke-width', 1)

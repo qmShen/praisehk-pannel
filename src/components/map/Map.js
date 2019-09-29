@@ -64,8 +64,15 @@ Map.prototype.mouseoutCircle = function(msg){
   // }
 };
 Map.prototype.initializeVisualization = function(){
-  this.aqSizeScale = d3.scaleLinear().domain([0, 150]).range([0, 20]);
-  this.windScale = d3.scaleLinear().domain([0, 20]).range([0, 120]);
+  let aqSizeScale = d3.scaleLinear().domain([0, 150]).range([0, 400]);
+  this.aqSizeScale = function(val){
+    return Math.sqrt(aqSizeScale(val))
+  };
+  let windScale = d3.scaleLinear().domain([0, 10]).range([0, 70]);
+  this.windScale = windScale;
+  // this.windScale = function(val){
+  //   return Math.sqrt(windScale(val))
+  // };
 };
 Map.prototype.showAQCMAQ = function(msg){
   let timestamp = msg['timestamp'];
@@ -138,23 +145,23 @@ Map.prototype.loadStations = function(stations){
 
 
   if(this.featureType == 'AQ'){
-    let CMAQCircles = this.stationsContainers.append('circle').attr('r', 0)
+    let CMAQCircles = this.stationsContainers.append('circle').attr('class', 'CMAQCircles').attr('r', 0)
       .attr('fill', '#479886').attr('stroke', '#479886').attr('stroke-width', 1).attr('stroke', 'white')
     CMAQCircles.each(function(d){
       d['render']['CMAQCircle'] = this;
     });
-    let AQCircles = this.stationsContainers.append('circle').attr('r', 0)
+    let AQCircles = this.stationsContainers.append('circle').attr('class', 'AQCircles').attr('r', 0)
       .attr('fill', '#d77451').attr('stroke', '#d77451').attr('stroke-width', 1).attr('stroke', 'white')
     AQCircles.each(function(d){
       d['render']['AQCircle'] = this;
     });
   }else if(this.featureType == 'Mete'){
     let WindLines = this.stationsContainers.append("line")
-      .style("stroke", '#479886').attr('stroke-width', 1.7)
+      .style("stroke", '#d77451').attr('stroke-width', 1.7)
       .attr("x1", 0).attr("y1",0).attr("x2", 0).attr("y2", 0);
 
     let WindWRFLines = this.stationsContainers.append("line")
-      .style("stroke", '#d77451').attr('stroke-width', 1.7)
+      .style("stroke", '#479886').attr('stroke-width', 1.7)
       .attr("x1", 0).attr("y1",0).attr("x2", 0).attr("y2", 0);
 
     let WindArcs = this.stationsContainers.append("path").attr('fill', 'none').attr('stroke', 'grey');
@@ -376,20 +383,17 @@ Map.prototype.visualizeNothing = function(id){
 
   d3.select(this.idMap[id]['render']['WindArc']).attr("d", arc).attr('fill-opacity', 0).attr('stroke-opacity', 0);
   d3.select(this.idMap[id]['render']['WindArc']).transition().attr('fill-opacity', 0.5).attr('stroke-opacity', 0.5);
-
-
   d3.select(this.idMap[id]['render']['WindLine']).transition()
     .attr("x1", 0)
     .attr("y1", 0)
     .attr("x2", 0)
-    .attr("y2", 0)
+    .attr("y2", 0);
 
   d3.select(this.idMap[id]['render']['WindWRFLine']).transition()
     .attr("x1", 0)
     .attr("y1",0)
     .attr("x2", 0 )
-    .attr("y2", 0)
-
+    .attr("y2", 0);
 
 };
 Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRFData, windDirWRFData){
@@ -397,11 +401,12 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
 
   //windData, windDirData, windWRFData, windDirWRFData
   if(valid(windData) && valid(windDirData) && valid(windWRFData) && valid(windDirWRFData)){
+
     d3.select(this.idMap[id]['render']['WindArc']);
     let lWRF = this.windScale(windWRFData);
     let lWind = this.windScale(windData);
-    let _windDir = (windDirData + 180) % 360;
-    let _windWRFDir = (windDirWRFData + 180) % 360;
+    let _windDir = (windDirData ) % 360;
+    let _windWRFDir = (windDirWRFData) % 360;
     let _startAngle = null;
     let _endAngle = null;
 
@@ -411,11 +416,11 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
     if(lWRF > lWind){
       outer = lWRF;
       inner = lWind;
-      color = '#d77451';
+      color = '#479886';
     }else{
       outer = lWind;
       inner = lWRF;
-      color = '#479886';
+      color = '#d77451';
     }
 
     if(_windDir>_windWRFDir){
@@ -440,13 +445,12 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
 
     d3.select(this.idMap[id]['render']['WindArc']).attr("d", arc).attr('fill', color).attr('fill-opacity', 0).attr('stroke', color).attr('stroke-opacity', 0);
     d3.select(this.idMap[id]['render']['WindArc']).transition().attr('fill-opacity', 0.5).attr('stroke-opacity', 0.5);
-  }
 
-  if(valid(windData) && valid(windDirData)){
+
     let l = this.windScale(windData);
     let radius = l;
 
-    let direction_pi = (windDirData + 90)  / 180 * Math.PI;
+    let direction_pi = (windDirData - 90)  / 180 * Math.PI;
 
     d3.select(this.idMap[id]['render']['WindLine']).transition()
       .attr("x1", 0)
@@ -455,21 +459,45 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
         return 0 + radius * Math.cos(direction_pi)
       })
       .attr("y2", 0 + radius * Math.sin(direction_pi))
-  }else{
-  }
 
-  if(valid(windWRFData) && valid(windDirWRFData)){
-    let l = this.windScale(windWRFData);
-    let radius = l;
-    let direction_pi = (windDirWRFData + 90) / 180 * Math.PI;
+    l = this.windScale(windWRFData);
+    radius = l;
+    direction_pi = (windDirWRFData - 90) / 180 * Math.PI;
     d3.select(this.idMap[id]['render']['WindWRFLine']).transition()
       .attr("x1", 0)
       .attr("y1",0)
       .attr("x2", 0 + radius * Math.cos(direction_pi))
       .attr("y2", 0 + radius * Math.sin(direction_pi))
-  }else{
-
   }
+
+  // if(valid(windData) && valid(windDirData)){
+  //   let l = this.windScale(windData);
+  //   let radius = l;
+  //
+  //   let direction_pi = (windDirData + 90)  / 180 * Math.PI;
+  //
+  //   d3.select(this.idMap[id]['render']['WindLine']).transition()
+  //     .attr("x1", 0)
+  //     .attr("y1",0)
+  //     .attr("x2", _=>{
+  //       return 0 + radius * Math.cos(direction_pi)
+  //     })
+  //     .attr("y2", 0 + radius * Math.sin(direction_pi))
+  // }else{
+  // }
+  //
+  // if(valid(windWRFData) && valid(windDirWRFData)){
+  //   let l = this.windScale(windWRFData);
+  //   let radius = l;
+  //   let direction_pi = (windDirWRFData + 90) / 180 * Math.PI;
+  //   d3.select(this.idMap[id]['render']['WindWRFLine']).transition()
+  //     .attr("x1", 0)
+  //     .attr("y1",0)
+  //     .attr("x2", 0 + radius * Math.cos(direction_pi))
+  //     .attr("y2", 0 + radius * Math.sin(direction_pi))
+  // }else{
+  //
+  // }
 };
 
 export default Map
