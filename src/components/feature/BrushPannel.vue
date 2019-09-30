@@ -1,6 +1,7 @@
 <template>
   <div>
-    <div class="mini_head">brush</div>
+    <div class="mini_head">Brush</div>
+    <slot></slot>
   </div>
 </template>
 

@@ -188,7 +188,29 @@ Map.prototype.loadStations = function(stations){
     // this.previousZoomLevel = this.zoomLevel
     this.update_visualization();
   });
+  if ( this.featureType == 'AQ') {
+    let valuesToShow = [50, 150];
+    let size = this.aqSizeScale;
+    let xCircle = 30;
+    let yCircle = 30;
+    let xLabel = 60;
 
+    // Add legend: circles
+    this.legend = this.svg.selectAll('.legendAQ').data(valuesToShow).enter().append('g').attr('class', 'legendAQ');
+    this.legend.append('circle')
+      .attr("cx", xCircle).attr("cy", yCircle).attr("r", size)
+      .attr('fill', 'None').attr('stroke', 'grey').attr('stroke-width', 1.5)
+
+    // Add legend: segments
+    this.legend.append("line")
+      .attr('x1', xCircle).attr('x2', xLabel).attr('y1', function(d){ return yCircle - size(d) }).attr('y2', function(d){ return yCircle - size(d) })
+      .attr('stroke', 'black').style('stroke-dasharray', ('2,2'));
+
+    // Add legend: labels
+    this.legend.append("text")
+      .attr('x', xLabel + 2).attr('y', function(d){ return yCircle - size(d) })
+      .text(function(d){ return d }).style("font-size", 10).attr('alignment-baseline', 'middle');
+  }
 };
 
 

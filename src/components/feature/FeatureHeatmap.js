@@ -241,7 +241,4 @@ FeatureHeatmap.prototype.updateByTimeRange = function(timeRange){
   this.renderHeatmap(timeRange[0], timeRange[1]);
 };
 
-
-
-
 export default FeatureHeatmap

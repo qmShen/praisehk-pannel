@@ -5,13 +5,13 @@
 </template>
 
 <script>
-  import MainView from './components/MainView.vue'
-  export default {
-    name: 'App',
-    components: {
-      MainView
+    import MainView from './components/MainView.vue'
+    export default {
+        name: 'App',
+        components: {
+            MainView
+        }
     }
-  }
 </script>
 
 <style>
@@ -29,9 +29,19 @@
   }
 
   .mini_head{
-    font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+    font-family: "monospace", "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
     background: rgb(243,243,243);
     width: 100%;
     height: 20px;
+    font-size: 13px;
+    padding-left: 3px;
+  }
+  .mini_title{
+    font-family: 'monospace';
+    height: 20px;
+    font-size: 13px;
+    padding-left: 3px;
+    display: table-cell;
+    vertical-align: middle;
   }
 </style>

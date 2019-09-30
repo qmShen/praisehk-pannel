@@ -54,7 +54,7 @@ BrushLineChart.prototype.render = function(){
   this.yMax = yMax;
   this.yMax = 100; // Given by domain expert
   var yScale = d3.scaleLinear()
-    .domain([0, yMax]).range([this.svgHeight - this.margin.bottom, this.margin.top]);
+    .domain([0,  this.yMax]).range([this.svgHeight - this.margin.bottom, this.margin.top]);
   var yAxis = d3.axisLeft().scale(yScale);
 
   var cmaq_line = d3.line()
