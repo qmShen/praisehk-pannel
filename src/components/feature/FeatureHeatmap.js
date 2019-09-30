@@ -169,7 +169,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
         value = parseInt(value * 100) / 100;
       }
       // return d.timestamp;
-      return 'Id: '+ stationId + ' error: ' + value + '\n timestamp: ' + format_date(new Date(d.timestamp * 1000));
+      return 'Id: '+ stationId + ' error: ' + value + '\nTimestamp: ' + format_date(new Date(d.timestamp * 1000));
     });
     rects.on('mouseover', function(d){
       _this.mouseover({
