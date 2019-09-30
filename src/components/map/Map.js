@@ -146,12 +146,12 @@ Map.prototype.loadStations = function(stations){
 
   if(this.featureType == 'AQ'){
     let CMAQCircles = this.stationsContainers.append('circle').attr('class', 'CMAQCircles').attr('r', 0)
-      .attr('fill', '#479886').attr('stroke', '#479886').attr('stroke-width', 1).attr('stroke', 'white')
+      .attr('fill', '#479886').attr('stroke', '#479886').attr('stroke-width', 0.5).attr('stroke', 'white')
     CMAQCircles.each(function(d){
       d['render']['CMAQCircle'] = this;
     });
     let AQCircles = this.stationsContainers.append('circle').attr('class', 'AQCircles').attr('r', 0)
-      .attr('fill', '#d77451').attr('stroke', '#d77451').attr('stroke-width', 1).attr('stroke', 'white')
+      .attr('fill', '#d77451').attr('stroke', '#d77451').attr('stroke-width', 0.5).attr('stroke', 'white')
     AQCircles.each(function(d){
       d['render']['AQCircle'] = this;
     });
@@ -188,8 +188,8 @@ Map.prototype.loadStations = function(stations){
     // this.previousZoomLevel = this.zoomLevel
     this.update_visualization();
   });
-  if ( this.featureType == 'AQ') {
-    let valuesToShow = [50, 150];
+  if(this.featureType == 'AQ'){
+    let valuesToShow = [10, 50, 150];
     let size = this.aqSizeScale;
     let xCircle = 30;
     let yCircle = 30;
@@ -209,6 +209,26 @@ Map.prototype.loadStations = function(stations){
     // Add legend: labels
     this.legend.append("text")
       .attr('x', xLabel + 2).attr('y', function(d){ return yCircle - size(d) })
+      .text(function(d){ return d }).style("font-size", 10).attr('alignment-baseline', 'middle');
+  }else if (this.featureType == 'Mete') {
+    let valuesToShow = [5, 10, 15];
+    let size = this.windScale;
+    let xCircle = 10;
+    let yCircle = 15;
+
+    // Add legend: line
+    this.legend = this.svg.selectAll('.legend').data(valuesToShow).enter().append('g').attr('class', 'legend');
+    this.legend.append("line")
+      .attr('x1', xCircle).attr('x2', function(d){ return xCircle + size(d) }).attr('y1', yCircle).attr('y2', yCircle)
+      .attr('stroke', 'grey').attr('stroke-width', 1.7);
+    this.legend.append("line")
+      .attr('x1', function(d){ return xCircle + size(d) }).attr('x2', function(d){ return xCircle + size(d) })
+      .attr('y1', yCircle).attr('y2', yCircle - 5)
+      .attr('stroke', 'grey').attr('stroke-width', 1);
+
+    // Add legend: labels
+    this.legend.append("text")
+      .attr('x', function(d){return xCircle - 5 + size(d)}).attr('y', yCircle - 10)
       .text(function(d){ return d }).style("font-size", 10).attr('alignment-baseline', 'middle');
   }
 };
@@ -282,10 +302,13 @@ Map.prototype.loadCMAQValue = function(data){
 Map.prototype.visualizeCMAQAQunit = function(id, aqValue, CMAQValue){
 
   let container = d3.select(this.idMap[id]['render']['svg_container']);
+
+  let strokeColor = (valid(aqValue) == true && valid(CMAQValue) == true) ? "white": "black";
   if(aqValue != undefined && aqValue != null && aqValue != 'null'){
 
-    let element = d3.select(this.idMap[id]['render']['AQCircle'])
-    element.transition().attr('r', this.aqSizeScale(aqValue))//.attr('fill', '#d77451').attr('stroke', '#d77451')
+    let element = d3.select(this.idMap[id]['render']['AQCircle']);
+
+    element.transition().attr('r', this.aqSizeScale(aqValue)).attr('stroke', strokeColor);//.attr('fill', '#d77451').attr('stroke', '#d77451')
     let circleElement = this.idMap[id]['render']['AQCircle'];
     if(valid(CMAQValue) && aqValue < CMAQValue){
       circleElement.parentNode.appendChild(circleElement);
@@ -295,7 +318,7 @@ Map.prototype.visualizeCMAQAQunit = function(id, aqValue, CMAQValue){
   }
   if(CMAQValue != undefined && CMAQValue != null && CMAQValue != 'null'){
     let element = d3.select(this.idMap[id]['render']['CMAQCircle']);
-    element.transition().attr('r', this.aqSizeScale(CMAQValue))//.attr('fill', '#479886').attr('stroke', '#479886')
+    element.transition().attr('r', this.aqSizeScale(CMAQValue)).attr('stroke', strokeColor)//.attr('fill', '#479886').attr('stroke', '#479886')
     let circleElement = this.idMap[id]['render']['CMAQCircle'];
     if(valid(CMAQValue) && aqValue > CMAQValue){
       circleElement.parentNode.appendChild(circleElement);
