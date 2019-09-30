@@ -7,20 +7,19 @@ import VueResource from 'vue-resource'
 
 Vue.use(VueResource);
 
-let dataServerUrl = "http://127.0.0.1:9000";
-// let dataServerUrl = "/praise-hk";
+const dataServerUrl = "http://127.0.0.1:9950";
 // const dataServerUrl = "/sv-analysis";
 // const dataServerUrl = Config.serverLink == ""? "" : Config.serverLink.substring(0,  Config.serverLink.length - 1);
 const $http = Vue.http;
 
-// function loadAQStations(callback){
-//   const url = `${dataServerUrl}/aq_stations`
-//   $http.get(url).then(response => {
-//     callback(response.data)
-//   }, errResponse => {
-//     console.log(errResponse)
-//   })
-// }
+function loadAQStations(callback){
+  const url = `${dataServerUrl}/aq_stations`
+  $http.get(url).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
 
 
 
