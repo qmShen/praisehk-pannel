@@ -285,11 +285,17 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
                 .attr('stop-color', '#081d58')
                 .attr('stop-opacity', 1)
 
+
+            let test = 220
+            let width = this.svgWidth/2
+            let height = this.svgHeight - 35
+            let height2 = this.svgHeight - 20
+
             gradientLegendGroup.append('rect')
                 .attr('width', 180)
                 .attr('height', 15)
                 .style('fill', 'url(#gradient_legend)')
-                .attr('transform', 'translate(220, 415)')
+                .attr('transform', "translate(" + width + "," + height + ")")
 
             var gradientLegendScale = d3.scaleLinear()
                 .domain([100, 0])
@@ -301,7 +307,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
 
             gradientLegendGroup.append('g')
                 .attr('class', 'gradient legend axis')
-                .attr('transform', 'translate(220, 430)')
+                .attr('transform', "translate(" + width + "," + height2 + ")")
                 .call(gradientLegendAxis)
                 .append('text')
                 .attr('transform', 'rotate(90)')
