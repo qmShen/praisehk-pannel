@@ -19,13 +19,62 @@ let BrushPannel = function(el) {
   this.margin = {'top': 20,'bottom': 20, 'left': 40, 'right':0};
   this.svg = d3.select(el).append('svg')
     .attr('width', this.svgWidth)
-    .attr('height', this.svgHeight);
+    .attr('height', this.svgHeight)
+    .style('position', 'absolute');
+
+  this.canvas = d3.select(el).append('canvas')
+    .attr('width', this.svgWidth)
+    .attr('height', this.svgHeight)
+    .attr('id', 'error_canvas')
+
 
   this.context = this.svg.append("g").attr("class", "context");
 
 
 
 };
+
+BrushPannel.prototype.colors = [
+  "#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb",
+  "#41b6c4", "#1d91c0", "#225ea8", "#253494",
+  "#081d58"
+];
+
+BrushPannel.prototype.render_error = function(mean_error){
+  let domain = [0, 5, 10, 15, 20, 25, 30, 35, 40, 50]
+
+  let c=document.getElementById("error_canvas");
+  let t = c.getContext('2d');
+
+  let n_time = (globalEnd - globalStart)/3600
+  let error_width = (this.svgWidth - this.margin.left)/n_time
+  let error_height = this.svgHeight - this.margin.bottom - this.margin.top
+
+  let colorScale = d3.scaleQuantile()
+    .domain(domain)
+    .range(this.colors);
+
+  let fakedata = new Array();
+  for(let i=0; i<n_time;i++){
+    fakedata[i] = i*100/n_time
+  }
+
+  for(let i=0;i<n_time;i++){
+    var fillColor = colorScale(mean_error[i]['error'])
+    drawRect(t,this.margin.left+error_width*i,this.margin.top,error_width,error_height,fillColor);
+  }
+
+  function drawRect(txc,x,y,w,h,fillColor) {
+      txc.beginPath();
+      txc.moveTo(x, y);
+      txc.lineTo(w + x, y);
+      txc.lineTo(w + x, h + y);
+      txc.lineTo(x, y + h);
+      txc.closePath();
+      txc.fillStyle = fillColor;
+      txc.fill();
+  }
+}
 
 BrushPannel.prototype.on = function(msg, func){
   if(msg == 'brushEnd'){

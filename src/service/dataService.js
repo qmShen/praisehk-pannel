@@ -99,6 +99,14 @@ function loadFeatureErrorValue(callback){
   })
 }
 
+function loadMeanError(param, callback){
+  const url = `${dataServerUrl}/load_mean_error`
+  $http.post(url, param).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
 
 
 export default{
@@ -109,6 +117,7 @@ export default{
   loadAQStations,
   loadMeteStations,
   loadFeatureValue,
-  loadModelValue
+  loadModelValue,
+  loadMeanError
 
 }

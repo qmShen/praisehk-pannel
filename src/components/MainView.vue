@@ -25,7 +25,7 @@
                  style="height: 50%; width: 100%"/>
       </el-col>
       <el-col :span="16" class="right">
-        <BrushPannel v-bind:featureValues='featureValues' style="width: 100%; height: 8%;position: relative;" class="boundary">
+        <BrushPannel v-bind:featureValues='featureValues' v-bind:mean_error='mean_error' style="width: 100%; height: 8%;position: relative;" class="boundary">
           <div style="font-size: 10px; position:absolute; right: 0px">Username: {{username}}</div>
         </BrushPannel>
         <TargetFeatureValue style="width: 100%; height: 17%; position: relative" class="boundary"
@@ -85,6 +85,7 @@
                 },
                 msg: 'Welcome to Your Vue.js App',
                 featureValues:[],
+                mean_error:[],
                 AQStations:[],
                 meteStations:[],
                 centerLoc:{loc: [22.3586, 114.1271]},
@@ -114,6 +115,10 @@
             * */
             let para = null;
             para = {'startTime': null, 'endTime': null}
+
+            dataService.loadMeanError({'startTime': 1451739600, 'endTime': 1546261200}, (data)=>{
+                this.mean_error = data;
+            });
 
             pipeService.onTimeRangeSelected(range=>{
 
