@@ -7,8 +7,11 @@ import VueResource from 'vue-resource'
 
 Vue.use(VueResource);
 
+
 const dataServerUrl = "http://127.0.0.1:9950";
 // const dataServerUrl = "/praise-vis";
+
+
 // const dataServerUrl = "/sv-analysis";
 // const dataServerUrl = Config.serverLink == ""? "" : Config.serverLink.substring(0,  Config.serverLink.length - 1);
 const $http = Vue.http;
@@ -99,8 +102,20 @@ function loadFeatureErrorValue(callback){
   })
 }
 
+
 function loadMeanError(param, callback){
   const url = `${dataServerUrl}/load_mean_error`
+      $http.post(url, param).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+
+// param includes {username, label, feature, startTime, endTime}
+function saveLabelValue(param, callback){
+  const url = `${dataServerUrl}/save_labels`
+
   $http.post(url, param).then(response => {
     callback(response.data)
   }, errResponse => {
@@ -108,6 +123,14 @@ function loadMeanError(param, callback){
   })
 }
 
+function saveLabelValue(param, callback){
+  const url = `${dataServerUrl}/save_labels`
+  $http.post(url, param).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
 
 export default{
   loadRegions,
@@ -118,6 +141,7 @@ export default{
   loadMeteStations,
   loadFeatureValue,
   loadModelValue,
-  loadMeanError
+  loadMeanError,
+  saveLabelValue
 
 }

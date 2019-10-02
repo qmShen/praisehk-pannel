@@ -7,7 +7,6 @@ import * as d3 from "d3";
 import 'leaflet/dist/leaflet.css'
 let HongKongStationList = [67, 68, 70, 74, 77, 78, 79, 80, 81, 82, 83, 84, 85, 87, 89, 90];
 let Map = function(el, el_svg, ceneterLoc, featureType) {
-  // console.log('leaflet', leaflet)
   this.map = L.map(el, { zoomControl:false }).setView(ceneterLoc.loc, 9);
   this.featureType = featureType;
   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
@@ -47,10 +46,6 @@ Map.prototype.mouseoverCircle = function(msg){
 };
 
 Map.prototype.setCurrentTimestamp = function(msg){
-  // if(this.signLoadData == false){
-  //   console.log('No data initialized');
-  //   return
-  // }
   if(this.featureType == 'AQ'){
     this.showAQCMAQ(msg);
   }else if(this.featureType == 'Mete'){
@@ -70,9 +65,50 @@ Map.prototype.initializeVisualization = function(){
   };
   let windScale = d3.scaleLinear().domain([0, 10]).range([0, 70]);
   this.windScale = windScale;
-  // this.windScale = function(val){
-  //   return Math.sqrt(windScale(val))
-  // };
+
+  if ( this.featureType == 'AQ') {
+    let valuesToShow = [50, 150];
+    let size = this.aqSizeScale;
+    let xCircle = 30;
+    let yCircle = 30;
+    let xLabel = 60;
+
+    // Add legend: circles
+    this.legend = this.svg.selectAll('.legend').data(valuesToShow).enter().append('g').attr('class', 'legend');
+    this.legend.append('circle')
+      .attr("cx", xCircle).attr("cy", yCircle).attr("r", size)
+      .attr('fill', 'None').attr('stroke', 'black');
+
+    // Add legend: segments
+    this.legend.append("line")
+      .attr('x1', xCircle).attr('x2', xLabel).attr('y1', function(d){ return yCircle - size(d) }).attr('y2', function(d){ return yCircle - size(d) })
+      .attr('stroke', 'black').style('stroke-dasharray', ('2,2'));
+
+    // Add legend: labels
+    this.legend.append("text")
+      .attr('x', xLabel + 2).attr('y', function(d){ return yCircle - size(d) })
+      .text(function(d){ return d }).style("font-size", 10).attr('alignment-baseline', 'middle');
+  } else if ( this.featureType == 'Mete' ) {
+    let valuesToShow = [5, 10];
+    let size = this.windScale;
+    let xCircle = 10;
+    let yCircle = 15;
+
+    // Add legend: line
+    this.legend = this.svg.selectAll('.legend').data(valuesToShow).enter().append('g').attr('class', 'legend');
+    this.legend.append("line")
+      .attr('x1', xCircle).attr('x2', function(d){ return xCircle + size(d) }).attr('y1', yCircle).attr('y2', yCircle)
+      .attr('stroke', 'black').attr('stroke-width', 1.7);
+    this.legend.append("line")
+      .attr('x1', function(d){ return xCircle + size(d) }).attr('x2', function(d){ return xCircle + size(d) })
+      .attr('y1', yCircle).attr('y2', yCircle - 5)
+      .attr('stroke', 'black').attr('stroke-width', 1);
+
+    // Add legend: labels
+    this.legend.append("text")
+      .attr('x', function(d){return xCircle - 5 + size(d)}).attr('y', yCircle - 10)
+      .text(function(d){ return d }).style("font-size", 10).attr('alignment-baseline', 'middle');
+  }
 };
 Map.prototype.showAQCMAQ = function(msg){
   let timestamp = msg['timestamp'];
@@ -276,7 +312,6 @@ Map.prototype.loadAQFeatureValue = function(data){
     }
   });
   this.timeStationMapAQ = timeStationMapAQ;
-  console.log('AQ Feature Value', new Date() - start_time);
 };
 
 Map.prototype.loadCMAQValue = function(data){
@@ -293,7 +328,6 @@ Map.prototype.loadCMAQValue = function(data){
     }
   });
   this.timeStationMapCMAQ = timeStationMapCMAQ;
-  console.log('AQ CMAQ Value', new Date() - start_time);
 };
 /*
 * Used in the air quality map
@@ -343,7 +377,6 @@ Map.prototype.loadWindValue = function(data){
     }
   });
   this.timeStationMapWind = timeStationMapWind;
-  console.log('Wind Feature Value', new Date() - start_time);
 };
 
 Map.prototype.loadWindDirValue = function(data){
@@ -360,7 +393,6 @@ Map.prototype.loadWindDirValue = function(data){
     }
   });
   this.timeStationMapWindDir = timeStationMapWindDir;
-  console.log('WindDir Feature Value', new Date() - start_time);
 };
 
 Map.prototype.loadWindWRFValue = function(data){
@@ -377,7 +409,6 @@ Map.prototype.loadWindWRFValue = function(data){
     }
   });
   this.timeStationMapWindWRF = timeStationMapWindWRF;
-  console.log('WindWRF Feature Value', new Date() - start_time);
 };
 
 Map.prototype.loadWindDirWRFValue = function(data){
@@ -394,7 +425,6 @@ Map.prototype.loadWindDirWRFValue = function(data){
     }
   });
   this.timeStationMapWindDirWRF = timeStationMapWindDirWRF;
-  console.log('WindDirWRF Feature Value', new Date() - start_time);
 };
 
 

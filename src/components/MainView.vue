@@ -34,8 +34,9 @@
                             element-loading-text="Loading"
                             element-loading-background="rgba(0, 0, 0, 0.4)">
           <div style="position: absolute; right: 10px; top: 25px" >
-            <el-button type="success" icon="el-icon-video-play" size="mini"  v-bind:disabled="buttonDisable" v-on:click="playAnimation" plain></el-button>
-            <el-button type="success"  icon="el-icon-video-pause" size="mini"  v-bind:disabled="buttonDisable" v-on:click="stopAnimation" plain></el-button>
+            <input type="text" v-model="labelName"></input>
+            <el-button type="success" icon="el-icon-upload" size="mini"  v-on:click="saveTimeInterval" plain></el-button>
+            <el-button type="success" icon="el-icon-video-play" size="mini"  v-bind:disabled="buttonDisable" v-on:click="toggleAnimation" plain></el-button>
           </div>
         </TargetFeatureValue>
         <div style="width: 100%; height: calc(75%); " class="boundary"
@@ -104,9 +105,13 @@
                 MeteDataN: 0,
                 timeHandler:null,
                 buttonDisable: false,
+                isButtonClicked: false,
                 mapReadyN:0,
                 dialogVisible: true,
-                username:''
+                username: '',
+                labelName: '',
+                labelStartTime: null,
+                labelEndTime: null,
             }
         },
         mounted: function(){
@@ -199,6 +204,11 @@
 
                 }
             })
+
+            pipeService.onTimeRangeBrushed(range=>{
+                this.labelStartTime = range[0];
+                this.labelEndTime = range[1];
+            });
         },
         watch:{
             AQDataN:function(n){
@@ -223,24 +233,30 @@
             }
         },
         methods:{
-            playAnimation:function(){
-                let _this = this;
-                this.timeHandler = setInterval(()=>{
-                    if(_this.currentTime == undefined){
-                        _this.currentTime = _this.timeRange[0]
-                    }
-                    this.currentTime  = this.currentTime + 3600;
-                    if(this.currentTime >= this.timeRange[1]){
-                        clearInterval(this.timeHandler);
-                    }
-
-                }, 1000)
+            saveTimeInterval: function(){
+                let para = {
+                    'username': this.username, 'label': this.labelName, 'feature': 'PM25',
+                    'startTime': this.labelStartTime, 'endTime': this.labelEndTime
+                };
+                dataService.saveLabelValue(para);
             },
-            stopAnimation: function(){
-                if(this.timeHandler){
+            toggleAnimation:function(){
+                this.isButtonClicked = !this.isButtonClicked;
+                if (this.isButtonClicked) {
+                    let _this = this;
+                    this.timeHandler = setInterval(()=>{
+                        if(_this.currentTime == undefined){
+                            _this.currentTime = _this.timeRange[0]
+                        }
+                        this.currentTime  = this.currentTime + 3600;
+                        if(this.currentTime >= this.timeRange[1]){
+                            clearInterval(this.timeHandler);
+                        }
+
+                    }, 1000)
+                } else {
                     clearInterval(this.timeHandler);
                 }
-
             },
             handleClose(done) {
                 if(this.username == '' || this.username == null || this.username == 'null'){
