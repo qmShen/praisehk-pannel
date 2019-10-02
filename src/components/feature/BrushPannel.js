@@ -45,7 +45,7 @@ BrushPannel.prototype.render_error = function(mean_error){
 
   let n_time = (globalEnd - globalStart)/3600
   let error_width = (this.svgWidth - this.margin.left)/n_time
-  let error_height = this.svgHeight - this.margin.bottom - this.margin.top
+  let error_height = this.svgHeight - this.margin.bottom - (this.svgHeight)/5
 
   let colorScale = d3.scaleQuantile()
     .domain(domain)
@@ -58,7 +58,7 @@ BrushPannel.prototype.render_error = function(mean_error){
 
   for(let i=0;i<n_time;i++){
     var fillColor = colorScale(mean_error[i]['error'])
-    drawRect(t,this.margin.left+error_width*i,this.margin.top,error_width,error_height,fillColor);
+    drawRect(t,this.margin.left+error_width*i,(this.svgHeight)/5,error_width,error_height,fillColor);
   }
 
   function drawRect(txc,x,y,w,h,fillColor) {
