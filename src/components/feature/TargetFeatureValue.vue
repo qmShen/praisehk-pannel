@@ -36,6 +36,7 @@
         },
         methods:{
             queryModelObs(stationId){
+                console.log('station id test', stationId);
                 dataService.loadCMAQOBSData(stationId, d=>{
                     this.LineChart.setData(d);
                 })

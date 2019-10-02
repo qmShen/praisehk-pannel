@@ -25,8 +25,8 @@ let FeatureHeatmap = function(el,featureObj) {
   this.svgWidth = this.$el.clientWidth ;
   this.svgHeight = this.$el.clientHeight;
   this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
-
-  this.margin = {'top': 20,'bottom': 50, 'left': 40, 'right':0};
+  this.stationGap = 10;
+  this.margin = {'top': 35,'bottom': 10, 'left': 40, 'right':0};
   // initial data
   this.update(featureObj);
 
@@ -52,7 +52,6 @@ FeatureHeatmap.prototype.update = function(featureObj){
     }
   }
   this.station_list = HongKongStation.concat(OtherStation);
-
   this.feature = featureObj['feature'];
   this.valueArray = featureObj['value'];
 
@@ -81,14 +80,14 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
   let _this = this;
   this.stationTimeMap = {};
   this.stationMap = {};
-  let rowHeight = (this.svgHeight - this.margin['top'] - this.margin['bottom']) / this.station_list.length;
+  let rowHeight = (this.svgHeight - this.margin['top'] - this.margin['bottom'] - this.stationGap - 25) / this.station_list.length;
   let unitWidth = rowHeight;
   // hard code
 
   // start_time = start_time == undefined ?this.valueArray[0].timestamp: start_time;
   // end_time = end_time == undefined ? this.valueArray[parseInt(this.svgWidth / unitWidth)].timestamp: end_time;
   this.svg.selectAll('g').remove();
-  this.container = this.svg.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
+  this.container = this.svg.append('g').attr('transform', 'translate(' + [this.margin.left, this.margin.top ]+')');
 
 
   valueArray = valueArray == undefined ? this.valueArray : valueArray;
@@ -236,7 +235,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
 
   var gradientLegendGroup = this.svg.append('g')
     .attr('class', 'gradient_legend_group')
-
+.attr('transform', "translate(" + this.margin['left'] + "," + 0 + ")")
 
 
   var gradientLegend = gradientLegendGroup.append('defs')
@@ -305,7 +304,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
     .attr('width', 180)
     .attr('height', 15)
     .style('fill', 'url(#gradient_legend)')
-    .attr('transform', "translate(" + width + "," + height + ")")
+    // .attr('transform', "translate(" + width + "," + height + ")")
 
   var gradientLegendScale = d3.scaleLinear()
     .domain([100, 0])
@@ -317,7 +316,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
 
   gradientLegendGroup.append('g')
     .attr('class', 'gradient legend axis')
-    .attr('transform', "translate(" + width + "," + height2 + ")")
+    .attr('transform', "translate(" + 0 + "," + 15 + ")")
     .call(gradientLegendAxis)
     .append('text')
     .attr('transform', 'rotate(90)')
@@ -349,14 +348,14 @@ FeatureHeatmap.prototype.onMouseInter = function(msg){
   //   d3.select(this.stationMap[key]).attr('stroke-width', 0.0);
   // }
   // d3.select(this.stationMap[stationId]).attr('stroke-width', 0.5);
-  this.HightLightRowRect.attr('y', dataObj['y']).attr('stroke-width', 0.5);
-  this.HightLightColumnRect.attr('x', dataObj['x']).attr('stroke-width', 0.5);
-  // let element = dataObj['e'];
-  // if(msg['action'] == 'over'){
-  //   d3.select(element).select('rect').attr('stroke', 'red');
-  // }else if(msg['action'] == 'out'){
-  //   d3.select(element).select('rect').attr('stroke', 'white');
-  // }
+  // this.HightLightRowRect.attr('y', dataObj['y']).attr('stroke-width', 0.5);
+  // this.HightLightColumnRect.attr('x', dataObj['x']).attr('stroke-width', 0.5);
+  let element = dataObj['e'];
+  if(msg['action'] == 'over'){
+    d3.select(element).select('rect').attr('stroke', 'red');
+  }else if(msg['action'] == 'out'){
+    d3.select(element).select('rect').attr('stroke', 'white');
+  }
 };
 
 

@@ -56,7 +56,7 @@
       width="20%"
       :before-close="handleClose">
       <span>Please input your user name:</span>
-      <el-input size = "mini" style="margin-top: 25px"  v-model="username" placeholder="User name:"></el-input>
+      <el-input size = "mini" style="margin-top: 25px"  v-model="username" placeholder="User name:" @keyup.enter.native="handleClose"></el-input>
       <span  slot="footer" class="dialog-footer">
         <el-button style="margin-top: -10px" size = "mini" type="primary" @click="handleClose">Confirm</el-button>
       </span>
@@ -243,7 +243,6 @@
 
             },
             handleClose(done) {
-                console.log('log username', this.username);
                 if(this.username == '' || this.username == null || this.username == 'null'){
                     this.$confirm('Use system without username? Your labeling will not be recorded.')
                         .then(_ => {
@@ -275,7 +274,7 @@
 <style>
   .mainview{
     /*background: #efedf2;*/
-    height: 100%;
+    height: 98%;
   }
   .horizontal_stripe{
     height: 100%;

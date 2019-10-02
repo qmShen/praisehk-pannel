@@ -513,6 +513,8 @@ Map.prototype.visualizeWindDirUnit = function(id, windData, windDirData, windWRF
       .attr("y1",0)
       .attr("x2", 0 + radius * Math.cos(direction_pi))
       .attr("y2", 0 + radius * Math.sin(direction_pi))
+  }else{
+    this.visualizeNothing(id);
   }
 
   // if(valid(windData) && valid(windDirData)){
