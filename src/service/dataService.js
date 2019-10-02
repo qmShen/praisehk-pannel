@@ -7,7 +7,7 @@ import VueResource from 'vue-resource'
 
 Vue.use(VueResource);
 
-let dataServerUrl = "http://127.0.0.1:9000";
+let dataServerUrl = "http://127.0.0.1:9950";
 // let dataServerUrl = "/praise-hk";
 // const dataServerUrl = "/sv-analysis";
 // const dataServerUrl = Config.serverLink == ""? "" : Config.serverLink.substring(0,  Config.serverLink.length - 1);
@@ -99,7 +99,15 @@ function loadFeatureErrorValue(callback){
   })
 }
 
-
+// param includes {username, label, feature, startTime, endTime}
+function saveLabelValue(param, callback){
+  const url = `${dataServerUrl}/save_labels`
+  $http.post(url, param).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
 
 export default{
   loadRegions,
@@ -109,6 +117,7 @@ export default{
   loadAQStations,
   loadMeteStations,
   loadFeatureValue,
-  loadModelValue
+  loadModelValue,
+  saveLabelValue
 
 }

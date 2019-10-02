@@ -15,8 +15,7 @@ var pipeService = new Vue({
 
     MOUSEOVERFEATUREIMPORTANCE: 'mouseover_featureimportance_boxplot',
     TIMERANGESELECTED : 'time_range_selected',
-
-    TIMERTICKED: 'timer_ticked',
+    TIMERANGEBRUSHED: 'time_range_brushed',
   },
 
   methods:{
@@ -120,21 +119,17 @@ var pipeService = new Vue({
       })
     },
 
-
     //------------------------------------------------------------
-    //When the timer has ticked, this will trigger
+    //When time range in time series view is selected this will triger
     //msg{start: sec, end: sec}
-    emitTimerTicked: function(){
-      this.$emit(this.TIMERTICKED);
+    emitTimeRangeBrushed: function(msg){
+      this.$emit(this.TIMERANGEBRUSHED, msg);
     },
-    onTimerTicked: function(callback){
-      this.$on(this.TIMERTICKED, function(){
-        callback();
+    onTimeRangeBrushed: function(callback){
+      this.$on(this.TIMERANGEBRUSHED, function(msg){
+        callback(msg);
       })
     },
-
-
-
 
   }
 });

@@ -16,6 +16,8 @@
         props:["currentTime"],
         mounted:function(){
             this.LineChart = new BrushLineChart(this.$el);
+            this.LineChart.on('brushEnd', this.handleBrushEnd);
+            this.LineChart.initTimeBrush();
 
             pipeService.onMouseOverCell(msg=>{
                 if(msg['action'] == 'click'){
@@ -26,7 +28,9 @@
 
             pipeService.onTimeRangeSelected(timerange=>{
                 this.LineChart.setTimeRange(timerange);
+                this.LineChart.setTimeBrush(timerange[0], timerange[1]);
             })
+
 
         },
         watch:{
@@ -40,7 +44,9 @@
                     this.LineChart.setData(d);
                 })
             },
-
+            handleBrushEnd(timerange){
+                pipeService.emitTimeRangeBrushed(timerange);
+            },
         }
     }
 </script>

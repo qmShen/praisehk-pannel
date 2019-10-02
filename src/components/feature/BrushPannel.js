@@ -62,7 +62,6 @@ BrushPannel.prototype.initTimeBrush = function(startTimestamp, endTimestamp){
     .attr('transform', 'translate('+[this.margin.left, this.svgHeight - this.margin.bottom] +')');
 
   function brushed() {
-    console.log('hereherehere');
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
     var s = d3.event.selection || _this.xScale.range();
     let filter_range = s.map(xScale.invert, xScale);
