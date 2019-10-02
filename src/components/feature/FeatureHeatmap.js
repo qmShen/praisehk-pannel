@@ -26,7 +26,7 @@ let FeatureHeatmap = function(el,featureObj) {
   this.svgHeight = this.$el.clientHeight;
   this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
 
-  this.margin = {'top': 20,'bottom': 20, 'left': 40, 'right':0};
+  this.margin = {'top': 20,'bottom': 50, 'left': 40, 'right':0};
   // initial data
   this.update(featureObj);
 
@@ -116,7 +116,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
 
   let timeRange = d3.extent(renderList, d=>d['timestamp']);
 
-  let xScale = d3.scaleLinear().domain(timeRange).range([0, _this.svgWidth - _this.margin['right'] - _this.margin.left]);
+  let xScale = d3.scaleLinear().domain(timeRange).range([0, _this.svgWidth - _this.margin['right'] - _this.margin.left - 10]);
 
 
   let colorBucketes = this.colors.length;
@@ -216,6 +216,115 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
   rowRects.each(function(stationId){
     _this.stationMap[stationId] = this;
   })
+
+
+
+
+  var blueColor = d3.rgb('#1f78b4')
+  var yellowColor = d3.rgb('#ffffb3');
+  var redColor = d3.rgb('#e41a1c');
+
+  var computeColor = d3.interpolate(blueColor, yellowColor);
+  var computeColor2 = d3.interpolate(yellowColor, redColor);
+  var linearColor = d3.scaleLinear()
+    .domain([0, 20])
+    .range([0, 1])
+  var linearColor2 = d3.scaleLinear()
+    .domain([20, 40])
+    .range([0, 1])
+
+
+  var gradientLegendGroup = this.svg.append('g')
+    .attr('class', 'gradient_legend_group')
+
+
+
+  var gradientLegend = gradientLegendGroup.append('defs')
+    .append('linearGradient')
+    .attr('id', 'gradient_legend')
+    .attr('x1', '0%') // bottom
+    .attr('y1', '0%')
+    .attr('x2', '100%') // to top
+    .attr('y2', '0%')
+    .attr('spreadMethod', 'pad')
+
+
+  gradientLegend.append('stop')
+    .attr('offset', '0%')
+    .attr('stop-color', '#ffffd9')
+    .attr('stop-opacity', 1)
+
+  gradientLegend.append('stop')
+    .attr('offset', '10%')
+    .attr('stop-color', '#edf8b1')
+    .attr('stop-opacity', 1)
+
+  gradientLegend.append('stop')
+    .attr('offset', '20%')
+    .attr('stop-color', '#c7e9b4')
+    .attr('stop-opacity', 1)
+
+  gradientLegend.append('stop')
+    .attr('offset', '30%')
+    .attr('stop-color', '#7fcdbb')
+    .attr('stop-opacity', 1)
+
+
+  gradientLegend.append('stop')
+    .attr('offset', '40%')
+    .attr('stop-color', '#41b6c4')
+    .attr('stop-opacity', 1)
+
+  gradientLegend.append('stop')
+    .attr('offset', '50%')
+    .attr('stop-color', '#1d91c0')
+    .attr('stop-opacity', 1)
+
+  gradientLegend.append('stop')
+    .attr('offset', '60%')
+    .attr('stop-color', '#225ea8')
+    .attr('stop-opacity', 1)
+
+  gradientLegend.append('stop')
+    .attr('offset', '90%')
+    .attr('stop-color', '#253494')
+    .attr('stop-opacity', 1)
+
+  gradientLegend.append('stop')
+    .attr('offset', '100%')
+    .attr('stop-color', '#081d58')
+    .attr('stop-opacity', 1)
+
+
+  let test = 220
+  let width = this.svgWidth/2
+  let height = this.svgHeight - 50
+  let height2 = this.svgHeight - 35
+
+  gradientLegendGroup.append('rect')
+    .attr('width', 180)
+    .attr('height', 15)
+    .style('fill', 'url(#gradient_legend)')
+    .attr('transform', "translate(" + width + "," + height + ")")
+
+  var gradientLegendScale = d3.scaleLinear()
+    .domain([100, 0])
+    .range([180, 0])
+
+  var gradientLegendAxis = d3.axisBottom()
+    .scale(gradientLegendScale)
+    .ticks(6)
+
+  gradientLegendGroup.append('g')
+    .attr('class', 'gradient legend axis')
+    .attr('transform', "translate(" + width + "," + height2 + ")")
+    .call(gradientLegendAxis)
+    .append('text')
+    .attr('transform', 'rotate(90)')
+    .attr('y', 0)
+    .attr('dy', '.71em')
+    .style('text-anchor', 'end')
+    .text('axis title')
 };
 
 FeatureHeatmap.prototype.on = function(msg, func){
