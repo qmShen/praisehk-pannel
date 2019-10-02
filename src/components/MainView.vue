@@ -112,6 +112,7 @@
                 labelName: '',
                 labelStartTime: null,
                 labelEndTime: null,
+                labelStationId: null,
             }
         },
         mounted: function(){
@@ -208,6 +209,7 @@
             pipeService.onTimeRangeBrushed(range=>{
                 this.labelStartTime = range[0];
                 this.labelEndTime = range[1];
+                this.labelStationId = range[2];
             });
         },
         watch:{
@@ -244,7 +246,7 @@
 
                 let para = {
                     'username': this.username, 'label': this.labelName, 'feature': 'PM25',
-                    'startTime': this.labelStartTime, 'endTime': this.labelEndTime
+                    'startTime': this.labelStartTime, 'endTime': this.labelEndTime, 'StationId': this.labelStationId
                 };
                 console.log(para);
                 dataService.saveLabelValue(para);

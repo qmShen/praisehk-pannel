@@ -100,8 +100,9 @@ BrushLineChart.prototype.render = function(){
   // Time Brush
   this.setTimeBrush(this.timerange[0], this.timerange[1]);
 };
-BrushLineChart.prototype.setData = function(data){
-  this.data  = data;
+BrushLineChart.prototype.setData = function(data, stationId){
+  this.data = data;
+  this.stationId = stationId;
   this.render();
 };
 
@@ -145,7 +146,7 @@ BrushLineChart.prototype.setTimeBrush = function(startTimestamp, endTimestamp){
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
     var s = d3.event.selection || _this.xScale.range();
     let filter_range = s.map(xScale.invert, xScale);
-    _this.brushEnd([dateToSecs(filter_range[0]), dateToSecs(filter_range[1])])
+    _this.brushEnd([dateToSecs(filter_range[0]), dateToSecs(filter_range[1]), _this.stationId]);
   }
 };
 
