@@ -34,9 +34,9 @@
                             element-loading-text="Loading"
                             element-loading-background="rgba(0, 0, 0, 0.4)">
           <div style="position: absolute; right: 10px; top: 25px" >
+            <el-button type="success" icon="el-icon-video-play" size="mini"  v-bind:disabled="buttonDisable" v-on:click="toggleAnimation" plain></el-button>
             <input type="text" v-model="labelName"></input>
             <el-button type="success" icon="el-icon-upload" size="mini"  v-on:click="saveTimeInterval" plain></el-button>
-            <el-button type="success" icon="el-icon-video-play" size="mini"  v-bind:disabled="buttonDisable" v-on:click="toggleAnimation" plain></el-button>
           </div>
         </TargetFeatureValue>
         <div style="width: 100%; height: calc(75%); " class="boundary"
@@ -234,12 +234,20 @@
         },
         methods:{
             saveTimeInterval: function(){
+                if (this.username == '' || this.username == null || this.username == 'null') {
+                    this.$alert('Username is missing. Please refresh to enter your username if you want to record the label.')
+                    return;
+                } else if (this.labelName == '' || this.labelName == null || this.labelName == 'null') {
+                    this.$alert('The label cannot be empty. Please enter a label for the selected time interval.')
+                    return;
+                }
+
                 let para = {
                     'username': this.username, 'label': this.labelName, 'feature': 'PM25',
                     'startTime': this.labelStartTime, 'endTime': this.labelEndTime
                 };
-                console.log(para)
-                // dataService.saveLabelValue(para);
+                console.log(para);
+                dataService.saveLabelValue(para);
             },
             toggleAnimation:function(){
                 this.isButtonClicked = !this.isButtonClicked;
