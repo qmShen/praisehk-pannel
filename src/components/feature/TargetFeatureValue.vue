@@ -28,7 +28,6 @@
 
             pipeService.onTimeRangeSelected(timerange=>{
                 this.LineChart.setTimeRange(timerange);
-                this.LineChart.setTimeBrush(timerange[0], timerange[1]);
             })
 
 

@@ -350,12 +350,21 @@ FeatureHeatmap.prototype.onMouseInter = function(msg){
   // d3.select(this.stationMap[stationId]).attr('stroke-width', 0.5);
   // this.HightLightRowRect.attr('y', dataObj['y']).attr('stroke-width', 0.5);
   // this.HightLightColumnRect.attr('x', dataObj['x']).attr('stroke-width', 0.5);
+<<<<<<< HEAD
   let element = dataObj['e'];
   if(msg['action'] == 'over'){
     d3.select(element).select('rect').attr('stroke', 'red');
   }else if(msg['action'] == 'out'){
     d3.select(element).select('rect').attr('stroke', 'white');
   }
+=======
+  // let element = dataObj['e'];
+  // if(msg['action'] == 'over'){
+  //   d3.select(element).select('rect').attr('stroke', 'red');
+  // }else if(msg['action'] == 'out'){
+  //   d3.select(element).select('rect').attr('stroke', 'white');
+  // }
+>>>>>>> jason
 };
 
 
