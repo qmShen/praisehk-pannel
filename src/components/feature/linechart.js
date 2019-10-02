@@ -8,8 +8,6 @@ let BrushLineChart = function(el){
   this.svgHeight = this.$el.clientHeight - 20;
   this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
   this.margin = {'top': 20,'bottom': 20, 'left': 40, 'right':0};
-
-  this.context = this.svg.append("g").attr("class", "context");
 };
 
 function toDateTime(secs) {
@@ -95,10 +93,12 @@ BrushLineChart.prototype.render = function(){
       return 'red'
     });
 
-
   this.currentTimeLine = obs_container.append('line')
     .attr('stroke-width', 0)
     .attr("x1", 0).attr("y1",0).attr("x2", 0).attr("y2", 0);
+
+  // Time Brush
+  this.setTimeBrush(this.timerange[0], this.timerange[1]);
 };
 BrushLineChart.prototype.setData = function(data){
   this.data  = data;
@@ -124,7 +124,7 @@ BrushLineChart.prototype.on = function(msg, func){
   }
 };
 
-BrushLineChart.prototype.initTimeBrush = function(startTimestamp, endTimestamp){
+BrushLineChart.prototype.setTimeBrush = function(startTimestamp, endTimestamp){
   let _this = this;
   startTimestamp = startTimestamp == undefined? 1451739600: startTimestamp;
   endTimestamp = endTimestamp == undefined? 1451750400: endTimestamp;
@@ -136,7 +136,7 @@ BrushLineChart.prototype.initTimeBrush = function(startTimestamp, endTimestamp){
     .extent([[0, 0], [this.svgWidth - this.margin.left, this.svgHeight]])
     .on("end", brushed);
 
-  this.context.append("g").attr('transform', 'translate(' + [this.margin.left, 0]+')')
+  this.svg.append("g").attr('transform', 'translate(' + [this.margin.left, 0]+')')
     .attr("class", "brush")
     .call(brush)
     .call(brush.move, [0, this.svgWidth / 40]);

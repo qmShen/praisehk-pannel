@@ -17,7 +17,6 @@
         mounted:function(){
             this.LineChart = new BrushLineChart(this.$el);
             this.LineChart.on('brushEnd', this.handleBrushEnd);
-            this.LineChart.initTimeBrush();
 
             pipeService.onMouseOverCell(msg=>{
                 if(msg['action'] == 'click'){

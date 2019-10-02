@@ -125,9 +125,7 @@ function saveLabelValue(param, callback){
 
 function saveLabelValue(param, callback){
   const url = `${dataServerUrl}/save_labels`
-  $http.post(url, param).then(response => {
-    callback(response.data)
-  }, errResponse => {
+  $http.post(url, param).then(response => {}, errResponse => {
     console.log(errResponse)
   })
 }
