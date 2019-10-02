@@ -233,7 +233,8 @@
                     'username': this.username, 'label': this.labelName, 'feature': 'PM25',
                     'startTime': this.labelStartTime, 'endTime': this.labelEndTime
                 };
-                dataService.saveLabelValue(para);
+                console.log(para)
+                // dataService.saveLabelValue(para);
             },
             toggleAnimation:function(){
                 this.isButtonClicked = !this.isButtonClicked;
@@ -267,7 +268,6 @@
                 }else{
                     this.dialogVisible = false;
                 }
-
             }
         },
 

@@ -226,8 +226,8 @@ FeatureHeatmap.prototype.onMouseInter = function(msg){
   //   d3.select(this.stationMap[key]).attr('stroke-width', 0.0);
   // }
   // d3.select(this.stationMap[stationId]).attr('stroke-width', 0.5);
-  this.HightLightRowRect.attr('y', dataObj['y']).attr('stroke-width', 0.5);
-  this.HightLightColumnRect.attr('x', dataObj['x']).attr('stroke-width', 0.5);
+  // this.HightLightRowRect.attr('y', dataObj['y']).attr('stroke-width', 0.5);
+  // this.HightLightColumnRect.attr('x', dataObj['x']).attr('stroke-width', 0.5);
   // let element = dataObj['e'];
   // if(msg['action'] == 'over'){
   //   d3.select(element).select('rect').attr('stroke', 'red');

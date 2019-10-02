@@ -22,9 +22,6 @@ let BrushPannel = function(el) {
     .attr('height', this.svgHeight);
 
   this.context = this.svg.append("g").attr("class", "context");
-
-
-
 };
 
 BrushPannel.prototype.on = function(msg, func){
@@ -45,7 +42,7 @@ BrushPannel.prototype.initTimeBrush = function(startTimestamp, endTimestamp){
 
 
   var brush = d3.brushX()
-    .extent([[0, 0], [this.svgWidth, this.svgHeight]])
+    .extent([[0, 0], [this.svgWidth - this.margin.left, this.svgHeight]])
     .on("end", brushed);
 
   this.context.append("g").attr('transform', 'translate(' + [this.margin.left, 0]+')')
