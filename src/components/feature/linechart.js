@@ -46,7 +46,7 @@ BrushLineChart.prototype.render = function(){
   this.xScale = xScale;
   var xAxis = d3.axisBottom().scale(xScale).tickFormat(d=>{
     // console.log('ddd', d, typeof (d));
-    return   d.getFullYear() + '/' + d.getMonth() + '/' + d.getDate() + ' ' +  d.getHours() + ":00"
+    return   d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' +  d.getHours() + ":00"
     // return d
   })
 

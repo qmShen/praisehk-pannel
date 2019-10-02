@@ -8,6 +8,8 @@ import * as d3 from "d3";
 let weekDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 let HongKongStationList = [67, 68, 70, 74, 77, 78, 79, 80, 81, 82, 83, 84, 85, 87, 89, 90];
+let HongKongStationMap = {};
+HongKongStationList.forEach(d=>HongKongStationMap[d] = true);
 
 let format_date = function(date){
   let month = date.getMonth() >= 9?date.getMonth() + 1:'0' + (date.getMonth() + 1);
@@ -39,14 +41,23 @@ FeatureHeatmap.prototype.update = function(featureObj){
   }
   let _item = featureObj['value'][0];
   this.station_list = [];
+  let HongKongStation = [];
+  let OtherStation = [];
   for(let key in _item){
     if(key == "timestamp") continue
-
-    this.station_list.push(key);
+    if(HongKongStationMap[key] == true){
+      HongKongStation.push(key)
+    }else{
+      OtherStation.push(key)
+    }
   }
+  this.station_list = HongKongStation.concat(OtherStation);
 
   this.feature = featureObj['feature'];
   this.valueArray = featureObj['value'];
+
+  console.log('featureObject', featureObj);
+
   // console.log('station_ids', this.valueArray)
   this.HongKongSatationIdMap = {};
   if(this.feature == 'PM25'){
@@ -82,8 +93,10 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
 
   valueArray = valueArray == undefined ? this.valueArray : valueArray;
   let rowContainer = this.container.selectAll('.row').data(this.station_list).enter().append('g').attr('class', 'row')
-    .attr('transform',(d, i) => 'translate('+[0,rowHeight * i] + ')');
-
+    .attr('transform',(d, i) => {
+      let gap = i >= HongKongStationList.length?10:0
+      return 'translate('+[0,rowHeight * i + gap] + ')'
+    });
 
   let renderList = [];
   if(valueArray == undefined) return
@@ -142,9 +155,10 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
       if(_this.stationTimeMap[stationId][d.timestamp] == undefined){
         _this.stationTimeMap[stationId][d.timestamp] = {};
       }
+      let gap = row_i >= HongKongStationList.length?10:0
       _this.stationTimeMap[stationId][d.timestamp]['e'] = this;
       _this.stationTimeMap[stationId][d.timestamp]['x'] = xScale(d.timestamp);
-      _this.stationTimeMap[stationId][d.timestamp]['y'] = row_i*rowHeight;
+      _this.stationTimeMap[stationId][d.timestamp]['y'] = row_i*rowHeight+gap;
     });
 
     let rects = cell_containers.append('rect')
@@ -238,7 +252,7 @@ FeatureHeatmap.prototype.onMouseInter = function(msg){
 
 
 FeatureHeatmap.prototype.updateByTimeRange = function(timeRange){
-  this.renderHeatmap(timeRange[0], timeRange[1]);
+  // this.renderHeatmap(timeRange[0], timeRange[1]);
 };
 
 export default FeatureHeatmap
