@@ -35,7 +35,7 @@
                             element-loading-background="rgba(0, 0, 0, 0.4)">
           <div style="position: absolute; right: 10px; top: 25px" >
             <el-button type="success" icon="el-icon-video-play" size="mini"  v-bind:disabled="buttonDisable" v-on:click="toggleAnimation" plain></el-button>
-            <input type="text" v-model="labelName"></input>
+            <input type="text" v-model="labelName" size="10"></input>
             <el-button type="success" icon="el-icon-upload" size="mini"  v-on:click="saveTimeInterval" plain></el-button>
           </div>
         </TargetFeatureValue>
