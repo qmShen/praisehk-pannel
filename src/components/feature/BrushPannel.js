@@ -62,14 +62,14 @@ BrushPannel.prototype.render_error = function(mean_error){
   }
 
   function drawRect(txc,x,y,w,h,fillColor) {
-      txc.beginPath();
-      txc.moveTo(x, y);
-      txc.lineTo(w + x, y);
-      txc.lineTo(w + x, h + y);
-      txc.lineTo(x, y + h);
-      txc.closePath();
-      txc.fillStyle = fillColor;
-      txc.fill();
+    txc.beginPath();
+    txc.moveTo(x, y);
+    txc.lineTo(w + x, y);
+    txc.lineTo(w + x, h + y);
+    txc.lineTo(x, y + h);
+    txc.closePath();
+    txc.fillStyle = fillColor;
+    txc.fill();
   }
 }
 
@@ -83,6 +83,8 @@ BrushPannel.prototype.on = function(msg, func){
 BrushPannel.prototype.initTimeBrush = function(startTimestamp, endTimestamp){
 
   let _this = this;
+  this.maxBrushSize = this.svgWidth / 75;
+  let maxBrushSize = this.maxBrushSize
   startTimestamp = startTimestamp == undefined? globalStart: startTimestamp;
   endTimestamp = endTimestamp == undefined? globalEnd: endTimestamp;
   let dateRange = [new Date(startTimestamp * 1000), new Date(endTimestamp * 1000)];
@@ -94,10 +96,11 @@ BrushPannel.prototype.initTimeBrush = function(startTimestamp, endTimestamp){
     .extent([[0, 0], [this.svgWidth - this.margin.left, this.svgHeight]])
     .on("end", brushed);
 
-  this.context.append("g").attr('transform', 'translate(' + [this.margin.left, 0]+')')
+  let brushHanlder = this.context.append("g").attr('transform', 'translate(' + [this.margin.left, 0]+')')
     .attr("class", "brush")
     .call(brush)
     .call(brush.move, [0, this.svgWidth / 75]);
+
 
 
   var xAxis = d3.axisBottom().scale(this.xScale);
@@ -110,8 +113,21 @@ BrushPannel.prototype.initTimeBrush = function(startTimestamp, endTimestamp){
   function brushed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
     var s = d3.event.selection || _this.xScale.range();
+    console.log('s1', s);
     let filter_range = s.map(xScale.invert, xScale);
-    _this.brushEnd([dateToSecs(filter_range[0]), dateToSecs(filter_range[1])])
+
+    if (d3.event.selection[1] - d3.event.selection[0] > maxBrushSize) {
+      console.log('large', d3.event.selection[1] - d3.event.selection[0],  maxBrushSize)
+      brushHanlder.transition()
+        .duration(400)
+        .call(brush.move, [
+          d3.event.selection[0],
+          d3.event.selection[0] + maxBrushSize
+        ]);
+    }else{
+      _this.brushEnd([dateToSecs(filter_range[0]), dateToSecs(filter_range[1])])
+    }
+
   }
 };
 

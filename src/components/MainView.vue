@@ -35,7 +35,13 @@
                             element-loading-background="rgba(0, 0, 0, 0.4)">
           <div style="position: absolute; right: 10px; top: 25px" >
             <el-button type="success" icon="el-icon-video-play" size="mini"  v-bind:disabled="buttonDisable" v-on:click="toggleAnimation" plain></el-button>
-            <input type="text" v-model="labelName" size="10"></input>
+            <input type="text" v-model="labelName" size="10" style="height: 20px"></input>
+
+            <select v-model="selected" style="height: 26px">
+              <option disabled value="">Select</option>
+              <option v-for="item in types">{{item}}</option>
+            </select>
+
             <el-button type="success" icon="el-icon-upload" size="mini"  v-on:click="saveTimeInterval" plain></el-button>
           </div>
         </TargetFeatureValue>
@@ -113,6 +119,8 @@
                 labelStartTime: null,
                 labelEndTime: null,
                 labelStationId: null,
+                types:['other', 'lead', 'lag'],
+                selected:'other'
             }
         },
         mounted: function(){
@@ -246,7 +254,7 @@
 
                 let para = {
                     'username': this.username, 'label': this.labelName, 'feature': 'PM25',
-                    'startTime': this.labelStartTime, 'endTime': this.labelEndTime, 'StationId': this.labelStationId
+                    'startTime': this.labelStartTime, 'endTime': this.labelEndTime, 'StationId': this.labelStationId, 'type': this.selected
                 };
                 console.log(para);
                 dataService.saveLabelValue(para);
@@ -278,7 +286,7 @@
                         })
                         .catch(_ => {
                             // cancel
-                            });
+                        });
                 }else{
                     this.dialogVisible = false;
                 }
