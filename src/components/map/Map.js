@@ -334,34 +334,54 @@ Map.prototype.loadCMAQValue = function(data){
 *
 * */
 Map.prototype.visualizeCMAQAQunit = function(id, aqValue, CMAQValue){
-
-  let container = d3.select(this.idMap[id]['render']['svg_container']);
-
-  let strokeColor = (valid(aqValue) == true && valid(CMAQValue) == true) ? "white": "black";
-  if(aqValue != undefined && aqValue != null && aqValue != 'null'){
-
+  //
+  // let container = d3.select(this.idMap[id]['render']['svg_container']);
+  //
+  // let strokeColor = (valid(aqValue) == true && valid(CMAQValue) == true) ? "white": "black";
+  // if(aqValue != undefined && aqValue != null && aqValue != 'null'){
+  //
+  //   let element = d3.select(this.idMap[id]['render']['AQCircle']);
+  //
+  //   element.transition().attr('r', this.aqSizeScale(aqValue)).attr('stroke', strokeColor);//.attr('fill', '#d77451').attr('stroke', '#d77451')
+  //   let circleElement = this.idMap[id]['render']['AQCircle'];
+  //   if(valid(CMAQValue) && aqValue < CMAQValue){
+  //     circleElement.parentNode.appendChild(circleElement);
+  //   }
+  // }else{
+  //   d3.select(this.idMap[id]['render']['AQCircle']).attr('r', 0).attr('stroke-width', 1);
+  // }
+  // if(CMAQValue != undefined && CMAQValue != null && CMAQValue != 'null'){
+  //   let element = d3.select(this.idMap[id]['render']['CMAQCircle']);
+  //   element.transition().attr('r', this.aqSizeScale(CMAQValue)).attr('stroke', strokeColor)//.attr('fill', '#479886').attr('stroke', '#479886')
+  //   let circleElement = this.idMap[id]['render']['CMAQCircle'];
+  //   if(valid(CMAQValue) && aqValue > CMAQValue){
+  //     circleElement.parentNode.appendChild(circleElement);
+  //   }
+  // }else{
+  //   d3.select(this.idMap[id]['render']['CMAQCircle']).attr('r', 0).attr('stroke-width', 1);
+  // }
+  let strokeColor = 'white';
+  if(valid(aqValue) && valid(CMAQValue)){
     let element = d3.select(this.idMap[id]['render']['AQCircle']);
-
     element.transition().attr('r', this.aqSizeScale(aqValue)).attr('stroke', strokeColor);//.attr('fill', '#d77451').attr('stroke', '#d77451')
-    let circleElement = this.idMap[id]['render']['AQCircle'];
-    if(valid(CMAQValue) && aqValue < CMAQValue){
+    element = d3.select(this.idMap[id]['render']['CMAQCircle']);
+    element.transition().attr('r', this.aqSizeScale(CMAQValue)).attr('stroke', strokeColor)//.attr('fill', '#479886').attr('stroke', '#479886')
+
+    if(aqValue < CMAQValue){
+      let circleElement = this.idMap[id]['render']['AQCircle'];
+      circleElement.parentNode.appendChild(circleElement);
+    }else if(aqValue >= CMAQValue){
+      let circleElement = this.idMap[id]['render']['CMAQCircle'];
       circleElement.parentNode.appendChild(circleElement);
     }
+
   }else{
     d3.select(this.idMap[id]['render']['AQCircle']).attr('r', 0).attr('stroke-width', 1);
-  }
-  if(CMAQValue != undefined && CMAQValue != null && CMAQValue != 'null'){
-    let element = d3.select(this.idMap[id]['render']['CMAQCircle']);
-    element.transition().attr('r', this.aqSizeScale(CMAQValue)).attr('stroke', strokeColor)//.attr('fill', '#479886').attr('stroke', '#479886')
-    let circleElement = this.idMap[id]['render']['CMAQCircle'];
-    if(valid(CMAQValue) && aqValue > CMAQValue){
-      circleElement.parentNode.appendChild(circleElement);
-    }
-  }else{
     d3.select(this.idMap[id]['render']['CMAQCircle']).attr('r', 0).attr('stroke-width', 1);
   }
 };
 
+Map.prototype.visualizeNoAQ
 
 Map.prototype.loadWindValue = function(data){
   let start_time = new Date();

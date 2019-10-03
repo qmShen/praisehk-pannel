@@ -235,7 +235,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
 
   var gradientLegendGroup = this.svg.append('g')
     .attr('class', 'gradient_legend_group')
-.attr('transform', "translate(" + this.margin['left'] + "," + 0 + ")")
+    .attr('transform', "translate(" + this.margin['left'] + "," + 0 + ")")
 
 
   var gradientLegend = gradientLegendGroup.append('defs')
@@ -304,7 +304,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
     .attr('width', 180)
     .attr('height', 15)
     .style('fill', 'url(#gradient_legend)')
-    // .attr('transform', "translate(" + width + "," + height + ")")
+  // .attr('transform', "translate(" + width + "," + height + ")")
 
   var gradientLegendScale = d3.scaleLinear()
     .domain([100, 0])
@@ -348,6 +348,7 @@ FeatureHeatmap.prototype.onMouseInter = function(msg){
   //   d3.select(this.stationMap[key]).attr('stroke-width', 0.0);
   // }
   // d3.select(this.stationMap[stationId]).attr('stroke-width', 0.5);
+
   // this.HightLightRowRect.attr('y', dataObj['y']).attr('stroke-width', 0.5);
   // this.HightLightColumnRect.attr('x', dataObj['x']).attr('stroke-width', 0.5);
 
@@ -358,9 +359,17 @@ FeatureHeatmap.prototype.onMouseInter = function(msg){
     d3.select(element).select('rect').attr('stroke', 'white');
   }
 
-
 };
 
+FeatureHeatmap.prototype.clickToSelect = function(msg){
+  let timestamp = msg['timestamp'];
+  let stationId = msg['stationId'];
+  let dataObj = this.stationTimeMap[stationId][timestamp];
+  if(dataObj == undefined){
+    return
+  }
+  this.HightLightRowRect.attr('y', dataObj['y']).attr('stroke-width', 0.5);
+};
 
 FeatureHeatmap.prototype.updateByTimeRange = function(timeRange){
   // this.renderHeatmap(timeRange[0], timeRange[1]);

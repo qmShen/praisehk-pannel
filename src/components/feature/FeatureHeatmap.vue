@@ -59,6 +59,7 @@
             handleMouseClick(msg){
                 msg['action'] = 'click';
                 msg['type'] = this.type;
+                this.handler.clickToSelect(msg);
                 pipeService.emitMouseOverCell(msg)
             },
         },
