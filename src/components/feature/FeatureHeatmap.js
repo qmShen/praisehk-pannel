@@ -19,7 +19,7 @@ let format_date = function(date){
   return string;
 };
 
-let FeatureHeatmap = function(el,featureObj) {
+let FeatureHeatmap = function(el,featureObj,AQStations) {
 
   this.$el = el;
   this.svgWidth = this.$el.clientWidth ;
@@ -27,6 +27,7 @@ let FeatureHeatmap = function(el,featureObj) {
   this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
   this.stationGap = 10;
   this.margin = {'top': 35,'bottom': 10, 'left': 40, 'right':0};
+  this.AQStations = AQStations;
   // initial data
   this.update(featureObj);
 
@@ -43,14 +44,16 @@ FeatureHeatmap.prototype.update = function(featureObj){
   this.station_list = [];
   let HongKongStation = [];
   let OtherStation = [];
-  for(let key in _item){
-    if(key == "timestamp") continue
+  this.AQStations.forEach(d=>{
+    let key = d['id'];
+    if(key == 'timestamp') return
     if(HongKongStationMap[key] == true){
-      HongKongStation.push(key)
+      HongKongStation.push(key);
     }else{
-      OtherStation.push(key)
+      OtherStation.push(key);
     }
-  }
+  });
+
   this.station_list = HongKongStation.concat(OtherStation);
   this.feature = featureObj['feature'];
   this.valueArray = featureObj['value'];

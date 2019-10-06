@@ -13,22 +13,20 @@
     import dataService from '../../service/dataService.js'
     export default {
         name: "LineChart",
-        props:["currentTime"],
+        props:["currentTime", 'colorSchema'],
         mounted:function(){
-            this.LineChart = new BrushLineChart(this.$el);
+            this.LineChart = new BrushLineChart(this.$el, this.colorSchema);
             this.LineChart.on('brushEnd', this.handleBrushEnd);
 
             pipeService.onMouseOverCell(msg=>{
                 if(msg['action'] == 'click'){
                     this.queryModelObs(msg['stationId']);
                 }
-
-            })
+            });
 
             pipeService.onTimeRangeSelected(timerange=>{
                 this.LineChart.setTimeRange(timerange);
-            })
-
+            });
 
         },
         watch:{
@@ -41,7 +39,7 @@
                 console.log('station id test', stationId);
                 dataService.loadCMAQOBSData(stationId, d=>{
                     this.LineChart.setData(d, stationId);
-                })
+                });
             },
             handleBrushEnd(timerange){
                 pipeService.emitTimeRangeBrushed(timerange);

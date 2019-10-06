@@ -2,12 +2,14 @@ import * as d3 from 'd3'
 import {limitTimeRange} from "element-ui/src/utils/date-util";
 import BrushPannel from "./BrushPannel";
 
-let BrushLineChart = function(el){
+let BrushLineChart = function(el, colorSchema){
   this.$el = el;
   this.svgWidth = this.$el.clientWidth ;
   this.svgHeight = this.$el.clientHeight - 20;
   this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
   this.margin = {'top': 20,'bottom': 20, 'left': 40, 'right':0};
+  this.obsColor = colorSchema.obs;
+  this.modelColor = colorSchema.model;
 };
 
 function toDateTime(secs) {
@@ -37,10 +39,8 @@ BrushLineChart.prototype.render = function(){
 
   this.xScale = xScale;
   var xAxis = d3.axisBottom().scale(xScale).tickFormat(d=>{
-    // console.log('ddd', d, typeof (d));
-    return   d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' +  d.getHours() + ":00"
-    // return d
-  })
+    return   d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' +  d.getHours() + ":00";
+  });
 
   var yMax = d3.max([d3.max(data, d => d.val_aq), d3.max(data, d => d.val_cmaq)]);
   this.yMax = yMax;
@@ -63,7 +63,7 @@ BrushLineChart.prototype.render = function(){
     .data([data]).enter().append('path')
     .attr('d', cmaq_line)
     .attr('fill', 'none')
-    .attr('stroke', 'blue');
+    .attr('stroke', this.modelColor);
 
   cmaq_container.append('g')
     .attr('class', 'xAxis')
@@ -90,7 +90,7 @@ BrushLineChart.prototype.render = function(){
       if(d.val_aq == 'null' || d.val_aq == undefined){
         return 'grey'
       }
-      return 'red'
+      return this.obsColor
     });
 
   this.currentTimeLine = obs_container.append('line')

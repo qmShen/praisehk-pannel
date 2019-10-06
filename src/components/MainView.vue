@@ -2,27 +2,31 @@
   <div class="mainview">
     <el-row :gutter="10" class="horizontal_stripe">
       <el-col :span="8" class="left">
-        <AQMap v-bind:stations="AQStations"
-               v-bind:centerLoc="centerLoc"
-               v-bind:AQFeatureValue="AQFeatureValue"
-               v-bind:CMAQFeatureValue="CMAQFeatureValue"
-               v-bind:currentTime="currentTime"
-               v-loading="AQMapLoading"
-               element-loading-text="Loading"
-               element-loading-background="rgba(0, 0, 0, 0.7)"
-               style="height: 50%; width: 100%"
+        <AQMap
+          v-bind:colorSchema="colorSchema"
+          v-bind:stations="AQStations"
+          v-bind:centerLoc="centerLoc"
+          v-bind:AQFeatureValue="AQFeatureValue"
+          v-bind:CMAQFeatureValue="CMAQFeatureValue"
+          v-bind:currentTime="currentTime"
+          v-loading="AQMapLoading"
+          element-loading-text="Loading"
+          element-loading-background="rgba(0, 0, 0, 0.7)"
+          style="height: 50%; width: 100%"
         />
-        <MeteMap v-bind:stations="meteStations"
-                 v-bind:centerLoc="centerLoc"
-                 v-bind:WindFeatureValue = "WindFeatureValue"
-                 v-bind:WindWRFFeatureValue = "WindWRFFeatureValue"
-                 v-bind:WindDirFeatureValue = "WindDirFeatureValue"
-                 v-bind:WindDirWRFFeatureValue = "WindDirWRFFeatureValue"
-                 v-bind:currentTime="currentTime"
-                 v-loading="MeteMapLoading"
-                 element-loading-text="Loading"
-                 element-loading-background="rgba(0, 0, 0, 0.7)"
-                 style="height: 50%; width: 100%"/>
+        <MeteMap
+          v-bind:colorSchema="colorSchema"
+          v-bind:stations="meteStations"
+          v-bind:centerLoc="centerLoc"
+          v-bind:WindFeatureValue = "WindFeatureValue"
+          v-bind:WindWRFFeatureValue = "WindWRFFeatureValue"
+          v-bind:WindDirFeatureValue = "WindDirFeatureValue"
+          v-bind:WindDirWRFFeatureValue = "WindDirWRFFeatureValue"
+          v-bind:currentTime="currentTime"
+          v-loading="MeteMapLoading"
+          element-loading-text="Loading"
+          element-loading-background="rgba(0, 0, 0, 0.7)"
+          style="height: 50%; width: 100%"/>
       </el-col>
       <el-col :span="16" class="right">
         <BrushPannel v-bind:featureValues='featureValues' v-bind:mean_error='mean_error' style="width: 100%; height: 8%;position: relative;" class="boundary">
@@ -30,6 +34,7 @@
         </BrushPannel>
         <TargetFeatureValue style="width: 100%; height: 17%; position: relative" class="boundary"
                             v-loading="AQMapLoading"
+                            v-bind:colorSchema="colorSchema"
                             v-bind:currentTime="currentTime"
                             element-loading-text="Loading"
                             element-loading-background="rgba(0, 0, 0, 0.4)">
@@ -50,7 +55,7 @@
              v-bind:currentTime="currentTime"
              element-loading-text="Loading"
              element-loading-background="rgba(0, 0, 0, 0.4)" >
-          <FeatureHeatmap style="width: 100%; height: calc(100% );" v-for="item in featureValues" v-bind:item="item" v-bind:key="item.feature">
+          <FeatureHeatmap style="width: 100%; height: calc(100% );" v-for="item in featureValues" v-bind:item="item" v-bind:key="item.feature" v-bind:AQStations="AQStations">
             {{item.feature}}
           </FeatureHeatmap>
         </div>
@@ -91,6 +96,7 @@
                     'location':[22.3586, 114.1271]
                 },
                 msg: 'Welcome to Your Vue.js App',
+                colorSchema:{'obs': "#479886", 'model': '#d77451'},
                 featureValues:[],
                 mean_error:[],
                 AQStations:[],
@@ -119,7 +125,7 @@
                 labelStartTime: null,
                 labelEndTime: null,
                 labelStationId: null,
-                types:['other', 'lead', 'lag'],
+                types:['other', 'lead', 'lag', 'over', 'under'],
                 selected:'other'
             }
         },
@@ -187,6 +193,11 @@
 
             // Done
             dataService.loadAQStations((AQStations)=>{
+                AQStations.sort((a, b)=>{
+                    let x = a.longitude;
+                    let y = b.longitude;
+                    return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+                });
                 this.AQStations = AQStations;
             });
 
@@ -212,7 +223,7 @@
                     let i = 0;
 
                 }
-            })
+            });
 
             pipeService.onTimeRangeBrushed(range=>{
                 this.labelStartTime = range[0];

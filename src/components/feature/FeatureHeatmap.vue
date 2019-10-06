@@ -14,7 +14,7 @@
     import pipeService from '../../service/pipeService.js'
     export default {
         name: "FeatureValue",
-        props:["item"],
+        props:["item", "AQStations"],
         data() {
             return {
               type: null
@@ -23,18 +23,16 @@
 
         watch:{
             item:function(){
-                console.log('item changed', this.item);
                 this.handler.update(this.item)
             }
         },
         mounted: function(){
-            console.log('item', this.item);
             if(this.item.feature == 'PM25'){
                 this.type = 'AQ'
             }else if(this.item.feature == 'Wind' || this.item.feature == 'WindDir' ){
                 this.type = 'Mete'
             }
-            this.handler = new FeatureHeatmap(this.$el, this.item);
+            this.handler = new FeatureHeatmap(this.$el, this.item, this.AQStations);
             this.handler.on('mouseover', this.handleMouseover);
             this.handler.on('mouseout', this.handleMouseout);
             this.handler.on('click', this.handleMouseClick);
