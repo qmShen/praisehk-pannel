@@ -122,7 +122,7 @@ BrushPannel.prototype.initTimeBrush = function(startTimestamp, endTimestamp){
         .duration(400)
         .call(brush.move, [
           d3.event.selection[0],
-          d3.event.selection[0] + maxBrushSize
+          d3.event.selection[0] + maxBrushSize - 0.01
         ]);
     }else{
       _this.brushEnd([dateToSecs(filter_range[0]), dateToSecs(filter_range[1])])
