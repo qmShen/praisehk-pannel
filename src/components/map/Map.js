@@ -30,6 +30,9 @@ let Map = function(el, el_svg, ceneterLoc, featureType) {
       this.HongKongSatationIdMap[d] = true
     })
   }
+
+  this.modelColor = "#479886"
+  this.obsColor = "#d77451"
 };
 
 Map.prototype.focus = function(loc){
@@ -59,10 +62,11 @@ Map.prototype.mouseoutCircle = function(msg){
   // }
 };
 Map.prototype.initializeVisualization = function(){
-  let aqSizeScale = d3.scaleLinear().domain([0, 150]).range([0, 400]);
-  this.aqSizeScale = function(val){
-    return Math.sqrt(aqSizeScale(val))
-  };
+  let aqSizeScale = d3.scaleLinear().domain([0, 150]).range([0, 40]);
+  this.aqSizeScale = aqSizeScale;
+  // this.aqSizeScale = function(val){
+  //   return Math.sqrt(aqSizeScale(val))
+  // };
   let windScale = d3.scaleLinear().domain([0, 10]).range([0, 70]);
   this.windScale = windScale;
 
@@ -181,16 +185,35 @@ Map.prototype.loadStations = function(stations){
 
 
   if(this.featureType == 'AQ'){
-    let CMAQCircles = this.stationsContainers.append('circle').attr('class', 'CMAQCircles').attr('r', 0)
-      .attr('fill', '#479886').attr('stroke', '#479886').attr('stroke-width', 0.5).attr('stroke', 'white')
-    CMAQCircles.each(function(d){
-      d['render']['CMAQCircle'] = this;
+
+    let CMAQArcs = this.stationsContainers.append("path").attr('fill', '#479886').attr('stroke', 'grey');
+    let AQArcs = this.stationsContainers.append("path").attr('fill', "#d77451").attr('stroke', 'grey');
+
+    CMAQArcs.each(function(d, i){
+      console.log(d, i)
+      d['render']['CMAQArc'] = this;
     });
-    let AQCircles = this.stationsContainers.append('circle').attr('class', 'AQCircles').attr('r', 0)
-      .attr('fill', '#d77451').attr('stroke', '#d77451').attr('stroke-width', 0.5).attr('stroke', 'white')
-    AQCircles.each(function(d){
-      d['render']['AQCircle'] = this;
+    AQArcs.each(function(d){
+      d['render']['AQArc'] = this;
     });
+    // let CMAQCircles = this.stationsContainers.append('circle').attr('class', 'CMAQCircles').attr('r', 0)
+    //   .attr('fill', '#479886').attr('stroke', '#479886').attr('stroke-width', 0.5).attr('stroke', 'white')
+    // CMAQCircles.each(function(d){
+    //   d['render']['CMAQCircle'] = this;
+    // });
+    // let AQCircles = this.stationsContainers.append('circle').attr('class', 'AQCircles').attr('r', 0)
+    //   .attr('fill', '#d77451').attr('stroke', '#d77451').attr('stroke-width', 0.5).attr('stroke', 'white')
+    // AQCircles.each(function(d){
+    //   d['render']['AQCircle'] = this;
+    // });
+    //
+
+
+
+    let pieChart = this.stationsContainers
+
+
+
   }else if(this.featureType == 'Mete'){
     let WindLines = this.stationsContainers.append("line")
       .style("stroke", '#d77451').attr('stroke-width', 1.7)
@@ -362,22 +385,49 @@ Map.prototype.visualizeCMAQAQunit = function(id, aqValue, CMAQValue){
   // }
   let strokeColor = 'white';
   if(valid(aqValue) && valid(CMAQValue)){
-    let element = d3.select(this.idMap[id]['render']['AQCircle']);
-    element.transition().attr('r', this.aqSizeScale(aqValue)).attr('stroke', strokeColor);//.attr('fill', '#d77451').attr('stroke', '#d77451')
-    element = d3.select(this.idMap[id]['render']['CMAQCircle']);
-    element.transition().attr('r', this.aqSizeScale(CMAQValue)).attr('stroke', strokeColor)//.attr('fill', '#479886').attr('stroke', '#479886')
+    console.log('aqvalue', aqValue);
+    let element = d3.select(this.idMap[id]['render']['AQArc']);
+    let mediumAngle = aqValue / (aqValue + CMAQValue) * 2 * Math.PI;
 
-    if(aqValue < CMAQValue){
-      let circleElement = this.idMap[id]['render']['AQCircle'];
-      circleElement.parentNode.appendChild(circleElement);
-    }else if(aqValue >= CMAQValue){
-      let circleElement = this.idMap[id]['render']['CMAQCircle'];
-      circleElement.parentNode.appendChild(circleElement);
-    }
+
+    var obsArc = d3.arc()
+      .outerRadius(this.aqSizeScale(aqValue))
+      .innerRadius(0)
+      .startAngle(0)
+      .endAngle(mediumAngle);
+
+    element.attr('fill', this.obsColor).attr('fill-opacity', 0.8).attr('stroke', this.obsColor).attr('stroke-opacity', 1).attr("d", obsArc);
+
+    var CMAQArc = d3.arc()
+      .outerRadius(this.aqSizeScale(aqValue))
+      .innerRadius(0)
+      .startAngle(mediumAngle)
+      .endAngle(2 * Math.PI );
+    let elementCMAQ = d3.select(this.idMap[id]['render']['CMAQArc']);
+    elementCMAQ.attr('fill', this.modelColor).attr('fill-opacity', 0.8).attr('stroke', this.modelColor).attr('stroke-opacity', 1).attr("d", CMAQArc);
+
+
+    /*Double circle*/
+    // let element = d3.select(this.idMap[id]['render']['AQCircle']);
+    // element.transition().attr('r', this.aqSizeScale(aqValue)).attr('stroke', strokeColor);//.attr('fill', '#d77451').attr('stroke', '#d77451')
+    // element = d3.select(this.idMap[id]['render']['CMAQCircle']);
+    // element.transition().attr('r', this.aqSizeScale(CMAQValue)).attr('stroke', strokeColor)//.attr('fill', '#479886').attr('stroke', '#479886')
+    //
+    // if(aqValue < CMAQValue){
+    //   let circleElement = this.idMap[id]['render']['AQCircle'];
+    //   circleElement.parentNode.appendChild(circleElement);
+    // }else if(aqValue >= CMAQValue){
+    //   let circleElement = this.idMap[id]['render']['CMAQCircle'];
+    //   circleElement.parentNode.appendChild(circleElement);
+    // }
 
   }else{
-    d3.select(this.idMap[id]['render']['AQCircle']).attr('r', 0).attr('stroke-width', 1);
-    d3.select(this.idMap[id]['render']['CMAQCircle']).attr('r', 0).attr('stroke-width', 1);
+    d3.select(this.idMap[id]['render']['AQArc']).attr('fill-opacity', 0).attr('stroke-opacity', 0)
+    d3.select(this.idMap[id]['render']['CMAQArc']).attr('fill-opacity', 0).attr('stroke-opacity', 0)
+
+    /*Double circle*/
+    // d3.select(this.idMap[id]['render']['AQCircle']).attr('r', 0).attr('stroke-width', 1);
+    // d3.select(this.idMap[id]['render']['CMAQCircle']).attr('r', 0).attr('stroke-width', 1);
   }
 };
 
