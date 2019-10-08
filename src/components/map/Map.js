@@ -381,7 +381,7 @@ Map.prototype.visualizeCMAQAQunit = function(id, aqValue, CMAQValue){
   }
 };
 
-Map.prototype.visualizeNoAQ
+
 
 Map.prototype.loadWindValue = function(data){
   let start_time = new Date();
