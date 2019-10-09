@@ -5,8 +5,8 @@
 
 import * as d3 from "d3";
 
-let globalStart = 1451739600;
-let globalEnd = 1546261200;
+let globalStart = 1522540800;
+let globalEnd = 1569884400;
 
 let dateToSecs = function(date){
   return parseInt(date.getTime() / 1000);
