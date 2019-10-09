@@ -48,7 +48,7 @@ BrushPannel.prototype.colors = [
 BrushPannel.prototype.render_error = function(mean_error){
   let domain = [0, 5, 10, 15, 20, 25, 30, 35, 40, 50]
 
-  let c=document.getElementById("git error_canvas");
+  let c=document.getElementById("error_canvas");
   let t = c.getContext('2d');
 
   t.clearRect(0, 0, this.svgWidth, this.svgHeight);
