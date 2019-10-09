@@ -1,5 +1,13 @@
 <template>
   <div class="mainview">
+    <div class="mini_head">
+      Select Feature
+      <select v-model="selectFeature" style="height: 17px">
+        <option disabled value="">Select</option>
+        <option v-for="item in featureList">{{item}}</option>
+      </select>
+
+    </div>
     <el-row :gutter="10" class="horizontal_stripe">
       <el-col :span="8" class="left">
         <AQMap
@@ -36,6 +44,7 @@
                             v-loading="AQMapLoading"
                             v-bind:colorSchema="colorSchema"
                             v-bind:currentTime="currentTime"
+                            :selectFeature="selectFeature"
                             element-loading-text="Loading"
                             element-loading-background="rgba(0, 0, 0, 0.4)">
           <div style="position: absolute; right: 10px; top: 25px" >
@@ -126,7 +135,9 @@
                 labelEndTime: null,
                 labelStationId: null,
                 types:['other', 'lead', 'lag', 'over', 'under'],
-                selected:'other'
+                selected:'other',
+                featureList:['NO2', 'PM25'],
+                selectFeature:'NO2'
             }
         },
         mounted: function(){
@@ -136,7 +147,7 @@
             let para = null;
             para = {'startTime': null, 'endTime': null}
 
-            dataService.loadMeanError({'startTime': 1451739600, 'endTime': 1546261200}, (data)=>{
+            dataService.loadMeanError({'startTime': 1451739600, 'endTime': 1546261200, 'feature': this.selectFeature}, (data)=>{
                 this.mean_error = data;
             });
 
@@ -145,9 +156,10 @@
                 this.AQMapLoading = true;
                 this.MeteMapLoading = true;
                 this.FeatureValueLoading = true;
-                para = {'startTime': range[0], 'endTime': range[1]};
+                para = {'startTime': range[0], 'endTime': range[1], 'feature':this.selectFeature};
 
                 dataService.loadFeatureData(para, (data)=>{
+                    console.log('feature value', data)
                     this.featureValues = data;
                     this.FeatureValueLoading = false;
                 });
@@ -156,7 +168,7 @@
                 this.AQDataN = 0;
                 this.MeteDataN = 0;
                 this.mapReadyN = 0;
-                para = {'ids': 'all', 'feature': 'PM25', 'timeRange': 1, 'startTime': range[0], 'endTime': range[1]}
+                para = {'ids': 'all', 'feature': this.selectFeature, 'timeRange': 1, 'startTime': range[0], 'endTime': range[1]}
                 dataService.loadFeatureValue(para, (data)=>{
                     this.AQFeatureValue = data;
                     this.AQDataN += 1;
@@ -251,6 +263,11 @@
                 }else{
                     this.buttonDisable = true
                 }
+            },
+            selectFeature: function(new_val){
+                dataService.loadMeanError({'startTime': 1451739600, 'endTime': 1546261200, 'feature': new_val}, (data)=>{
+                    this.mean_error = data;
+                });
             }
         },
         methods:{

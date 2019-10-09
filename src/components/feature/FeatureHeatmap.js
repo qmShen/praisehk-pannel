@@ -56,6 +56,7 @@ FeatureHeatmap.prototype.update = function(featureObj){
 
   this.station_list = HongKongStation.concat(OtherStation);
   this.feature = featureObj['feature'];
+  console.log('feature', this.feature)
   this.valueArray = featureObj['value'];
 
   console.log('featureObject', featureObj);
@@ -123,7 +124,11 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
 
   let colorBucketes = this.colors.length;
   let domain = []
-  if(this.feature == 'PM25'){
+  if(this.feature == 'NO2'){
+    domain = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
+
+  }
+  else if(this.feature == 'PM25'){
     domain = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
     maxFeaturValue = 100;
   }else if(this.feature == 'wind'){

@@ -190,7 +190,7 @@ Map.prototype.loadStations = function(stations){
     let AQArcs = this.stationsContainers.append("path").attr('fill', "#d77451").attr('stroke', 'grey');
 
     CMAQArcs.each(function(d, i){
-      console.log(d, i)
+
       d['render']['CMAQArc'] = this;
     });
     AQArcs.each(function(d){
@@ -385,7 +385,7 @@ Map.prototype.visualizeCMAQAQunit = function(id, aqValue, CMAQValue){
   // }
   let strokeColor = 'white';
   if(valid(aqValue) && valid(CMAQValue)){
-    console.log('aqvalue', aqValue);
+
     let element = d3.select(this.idMap[id]['render']['AQArc']);
     let mediumAngle = aqValue / (aqValue + CMAQValue) * 2 * Math.PI;
 

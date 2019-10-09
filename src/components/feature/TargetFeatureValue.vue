@@ -13,7 +13,7 @@
     import dataService from '../../service/dataService.js'
     export default {
         name: "LineChart",
-        props:["currentTime", 'colorSchema'],
+        props:["currentTime", 'colorSchema', 'selectFeature'],
         mounted:function(){
             this.LineChart = new BrushLineChart(this.$el, this.colorSchema);
             this.LineChart.on('brushEnd', this.handleBrushEnd);
@@ -37,7 +37,8 @@
         methods:{
             queryModelObs(stationId){
                 console.log('station id test', stationId);
-                dataService.loadCMAQOBSData(stationId, d=>{
+                let para = {'feature': this.selectFeature, 'stationId': stationId};
+                dataService.loadCMAQOBSData(para, d=>{
                     this.LineChart.setData(d, stationId);
                 });
             },

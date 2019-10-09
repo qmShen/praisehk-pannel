@@ -27,6 +27,7 @@
             }
         },
         mounted: function(){
+            console.log('item', this.item)
             if(this.item.feature == 'PM25'){
                 this.type = 'AQ'
             }else if(this.item.feature == 'Wind' || this.item.feature == 'WindDir' ){

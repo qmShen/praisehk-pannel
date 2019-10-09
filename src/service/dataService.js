@@ -46,9 +46,9 @@ function loadFeatureData(param, callback){
   })
 }
 
-function loadCMAQOBSData(station_id, callback){
+function loadCMAQOBSData(param, callback){
   const url = `${dataServerUrl}/load_cmaq_obs`
-  $http.post(url, {'station_id': station_id}).then(response => {
+  $http.post(url, param).then(response => {
     callback(response.data)
   }, errResponse => {
     console.log(errResponse)
