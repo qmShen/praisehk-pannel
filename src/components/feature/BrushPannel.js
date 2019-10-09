@@ -43,6 +43,8 @@ BrushPannel.prototype.render_error = function(mean_error){
   let c=document.getElementById("error_canvas");
   let t = c.getContext('2d');
 
+  t.clearRect(0, 0, this.svgWidth, this.svgHeight);
+
   let n_time = (globalEnd - globalStart)/3600
   let error_width = (this.svgWidth - this.margin.left)/n_time
   let error_height = this.svgHeight - this.margin.bottom - (this.svgHeight)/5
