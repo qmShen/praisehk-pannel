@@ -18,12 +18,11 @@
         </el-form-item>
       </el-form>
 
-      <TargetFeatureValue v-bind:colorSchema="{'obs': '#479886', 'model': '#d77451'}"
-                          element-loading-text="Loading"
-                          element-loading-background="rgba(0, 0, 0, 0.4)">
-      </TargetFeatureValue>
-
       <div slot="footer" class="dialog-footer">
+
+        <LabelLineChart :station_id="label_data.stationId" :startTime="label_data.startTime" :endTime="label_data.endTime">
+        </LabelLineChart>
+
         <el-button @click="dialogLabelVisible = false">Dismiss</el-button>
         <el-button type="danger" @click="dialogLabelVisible = false">Delete</el-button>
         <el-button type="primary" @click="dialogLabelVisible = false">Update</el-button>
@@ -36,6 +35,7 @@
     import BrushPannel from './BrushPannel.js'
     import TargetFeatureValue from './TargetFeatureValue.vue'
     import pipeService from '../../service/pipeService.js'
+    import LabelLineChart from "./LabelLineChart";
     export default {
         name: "BrushPannel",
         props:["mean_error", "label_info"],
@@ -52,7 +52,9 @@
                     'feature': '',
                     'stationId': '80',
                     'labelType': ''
-                }
+                },
+                startTimeToUpdate: 1539811600,
+                endTimeToUpdate: 1540261200
             }
         },
         watch:{
@@ -68,6 +70,11 @@
             this.handler.on('brushEnd', this.handleBrushEnd);
             this.handler.on('labelClick', this.handleLabelClick);
             this.handler.initTimeBrush();
+
+            pipeService.onDialogTimeRangeBrushed(range=>{
+                this.startTimeToUpdate = range[0];
+                this.endTimeToUpdate = range[1];
+            });
         },
         methods:{
             handleBrushEnd(timerange){
@@ -79,7 +86,7 @@
             }
         },
         components: {
-            TargetFeatureValue
+            LabelLineChart
         }
     }
 </script>
