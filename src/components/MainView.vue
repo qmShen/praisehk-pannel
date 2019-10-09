@@ -37,7 +37,7 @@
           style="height: 50%; width: 100%"/>
       </el-col>
       <el-col :span="16" class="right">
-        <BrushPannel v-bind:featureValues='featureValues' v-bind:mean_error='mean_error' style="width: 100%; height: 8%;position: relative;" class="boundary">
+        <BrushPannel :label_info='label_info' :mean_error='mean_error' style="width: 100%; height: 8%;position: relative;" class="boundary">
           <div style="font-size: 10px; position:absolute; right: 0px">Username: {{username}}</div>
         </BrushPannel>
         <TargetFeatureValue style="width: 100%; height: 17%; position: relative" class="boundary"
@@ -49,7 +49,7 @@
                             element-loading-background="rgba(0, 0, 0, 0.4)">
           <div style="position: absolute; right: 10px; top: 25px" >
             <el-button type="success" icon="el-icon-video-play" size="mini"  v-bind:disabled="buttonDisable" v-on:click="toggleAnimation" plain></el-button>
-            <input type="text" v-model="labelName" size="10" style="height: 20px"></input>
+            <input type="text" v-model="labelName" size="10" style="height: 20px" placeholder="label name"></input>
 
             <select v-model="selected" style="height: 26px">
               <option disabled value="">Select</option>
@@ -137,7 +137,9 @@
                 types:['other', 'lead', 'lag', 'over', 'under'],
                 selected:'other',
                 featureList:['NO2', 'PM25'],
-                selectFeature:'NO2'
+                selectFeature:'NO2',
+                label_info: []
+
             }
         },
         mounted: function(){
@@ -275,17 +277,16 @@
                 if (this.username == '' || this.username == null || this.username == 'null') {
                     this.$alert('Username is missing. Please refresh to enter your username if you want to record the label.')
                     return;
-                } else if (this.labelName == '' || this.labelName == null || this.labelName == 'null') {
-                    this.$alert('The label cannot be empty. Please enter a label for the selected time interval.')
-                    return;
                 }
 
                 let para = {
                     'username': this.username, 'label': this.labelName, 'feature': 'PM25',
                     'startTime': this.labelStartTime, 'endTime': this.labelEndTime, 'StationId': this.labelStationId, 'type': this.selected
                 };
-                console.log(para);
                 dataService.saveLabelValue(para);
+                dataService.loadLabelValue({'username': this.username, 'feature': 'PM25'}, (data)=>{
+                    this.label_info = data;
+                });
             },
             toggleAnimation:function(){
                 this.isButtonClicked = !this.isButtonClicked;
@@ -317,6 +318,10 @@
                         });
                 }else{
                     this.dialogVisible = false;
+
+                    dataService.loadLabelValue({'username': this.username, 'feature': 'PM25'}, (data)=>{
+                        this.label_info = data;
+                    });
                 }
             }
         },
