@@ -121,8 +121,8 @@ BrushPannel.prototype.on = function(msg, func){
 BrushPannel.prototype.initTimeBrush = function(startTimestamp, endTimestamp){
 
   let _this = this;
-  this.maxBrushSize = this.svgWidth / 75;
-  let maxBrushSize = this.maxBrushSize
+  this.maxBrushSize = this.svgWidth / 28;
+  let maxBrushSize = this.maxBrushSize;
   startTimestamp = startTimestamp == undefined? globalStart: startTimestamp;
   endTimestamp = endTimestamp == undefined? globalEnd: endTimestamp;
   let dateRange = [new Date(startTimestamp * 1000), new Date(endTimestamp * 1000)];
@@ -137,7 +137,7 @@ BrushPannel.prototype.initTimeBrush = function(startTimestamp, endTimestamp){
   let brushHanlder = this.context.append("g").attr('transform', 'translate(' + [this.margin.left, this.svgHeight/5]+')')
     .attr("class", "brush")
     .call(brush)
-    .call(brush.move, [0, this.svgWidth / 75]);
+    .call(brush.move, [0, this.svgWidth / 28]);
 
 
 
