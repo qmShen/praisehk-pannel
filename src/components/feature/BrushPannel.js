@@ -84,7 +84,7 @@ BrushPannel.prototype.render_error = function(mean_error){
 }
 
 BrushPannel.prototype.render_labels = function(label_info){
-  let label_size = this.svgHeight/5;
+  let label_size = this.svgHeight/7;
   let symbolGenerator = d3.symbol().size(label_size*10);
   let margin = this.margin.left;
 
