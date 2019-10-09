@@ -1,6 +1,6 @@
 <template>
   <div class="boundary">
-    <div class="mini_head">Obs VS CMAQ</div>
+    <div class="mini_head">Obs VS CMAQ ({{this.selectFeature}})</div>
     <slot></slot>
   </div>
 </template>

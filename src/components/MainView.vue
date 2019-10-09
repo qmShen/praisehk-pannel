@@ -336,7 +336,7 @@
 <style>
   .mainview{
     /*background: #efedf2;*/
-    height: 98%;
+    height: 96%;
   }
   .horizontal_stripe{
     height: 100%;
