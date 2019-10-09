@@ -29,7 +29,7 @@
           style="height: 50%; width: 100%"/>
       </el-col>
       <el-col :span="16" class="right">
-        <BrushPannel v-bind:featureValues='featureValues' v-bind:mean_error='mean_error' style="width: 100%; height: 8%;position: relative;" class="boundary">
+        <BrushPannel :label_info='label_info' :mean_error='mean_error' style="width: 100%; height: 8%;position: relative;" class="boundary">
           <div style="font-size: 10px; position:absolute; right: 0px">Username: {{username}}</div>
         </BrushPannel>
         <TargetFeatureValue style="width: 100%; height: 17%; position: relative" class="boundary"
@@ -40,7 +40,7 @@
                             element-loading-background="rgba(0, 0, 0, 0.4)">
           <div style="position: absolute; right: 10px; top: 25px" >
             <el-button type="success" icon="el-icon-video-play" size="mini"  v-bind:disabled="buttonDisable" v-on:click="toggleAnimation" plain></el-button>
-            <input type="text" v-model="labelName" size="10" style="height: 20px"></input>
+            <input type="text" v-model="labelName" size="10" style="height: 20px" placeholder="label name"></input>
 
             <select v-model="selected" style="height: 26px">
               <option disabled value="">Select</option>
@@ -126,7 +126,8 @@
                 labelEndTime: null,
                 labelStationId: null,
                 types:['other', 'lead', 'lag', 'over', 'under'],
-                selected:'other'
+                selected:'other',
+                label_info: []
             }
         },
         mounted: function(){
@@ -300,6 +301,10 @@
                         });
                 }else{
                     this.dialogVisible = false;
+
+                    dataService.loadLabelValue({'username': 'jason', 'feature': 'PM25'}, (data)=>{
+                        this.label_info = data;
+                    });
                 }
             }
         },

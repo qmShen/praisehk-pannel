@@ -112,20 +112,18 @@ function loadMeanError(param, callback){
   })
 }
 
-// param includes {username, label, feature, startTime, endTime}
-// function saveLabelValue(param, callback){
-//   const url = `${dataServerUrl}/save_labels`
-//
-//   $http.post(url, param).then(response => {
-//     callback(response.data)
-//   }, errResponse => {
-//     console.log(errResponse)
-//   })
-// }
-
 function saveLabelValue(param, callback){
   const url = `${dataServerUrl}/save_labels`
   $http.post(url, param).then(response => {}, errResponse => {
+    console.log(errResponse)
+  })
+}
+
+function loadLabelValue(param, callback){
+  const url = `${dataServerUrl}/load_labels`
+  $http.post(url, param).then(response => {
+    callback(response.data)
+  }, errResponse => {
     console.log(errResponse)
   })
 }
@@ -140,6 +138,6 @@ export default{
   loadFeatureValue,
   loadModelValue,
   loadMeanError,
-  saveLabelValue
-
+  saveLabelValue,
+  loadLabelValue
 }
