@@ -11,7 +11,7 @@
 
     export default {
         name: "LabelLineChart",
-        props:['station_id', 'start_time', 'end_time'],
+        props:['station_id', 'start_time', 'end_time', 'selectFeature'],
         watch:{
             station_id: function(new_data) {
                 this.queryModelObs();
@@ -24,7 +24,8 @@
         },
         methods:{
             queryModelObs(){
-                dataService.loadCMAQOBSData(this.station_id, d=>{
+                let para = {'feature': this.selectFeature, 'stationId': this.station_id};
+                dataService.loadCMAQOBSData(para, d=>{
                     this.LineChart.setData(d, this.start_time, this.end_time);
                 });
             },

@@ -18,6 +18,7 @@
         </el-form-item>
 
         <LabelLineChart :station_id="label_data.stationId"
+                        :selectFeature="selectFeature"
                         :start_time="label_data.startTime" :end_time="label_data.endTime">
         </LabelLineChart>
       </el-form>
@@ -39,7 +40,7 @@
     import dataService from "../../service/dataService";
     export default {
         name: "BrushPannel",
-        props:["mean_error", "label_info"],
+        props:["mean_error", "label_info", "selectFeature"],
         data () {
             return {
                 dialogLabelVisible: false,

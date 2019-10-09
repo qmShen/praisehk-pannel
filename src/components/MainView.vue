@@ -37,7 +37,11 @@
           style="height: 50%; width: 100%"/>
       </el-col>
       <el-col :span="16" class="right">
-        <BrushPannel :label_info='label_info' :mean_error='mean_error' style="width: 100%; height: 8%;position: relative;" class="boundary">
+        <BrushPannel
+          :label_info='label_info'
+          :mean_error='mean_error'
+          :selectFeature="selectFeature"
+          style="width: 100%; height: 8%;position: relative;" class="boundary">
           <div style="font-size: 10px; position:absolute; right: 0px">Username: {{username}}</div>
         </BrushPannel>
         <TargetFeatureValue style="width: 100%; height: 17%; position: relative" class="boundary"
