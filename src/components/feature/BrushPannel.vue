@@ -2,7 +2,7 @@
   <div>
     <slot></slot>
 
-    <el-dialog title="Label detail" :visible.sync="dialogLabelVisible">
+    <el-dialog title="Label detail" :visible.sync="dialogLabelVisible" width="80%">
       <el-form :model="label_data">
         <el-form-item label="Label" :label-width="dialogLabelWidth">
           <el-input v-model="label_data.label" autocomplete="off" placeholder="Enter label if any"></el-input>
@@ -16,16 +16,17 @@
             <el-option label="under" value="under"></el-option>
           </el-select>
         </el-form-item>
+
+        <LabelLineChart :station_id="label_data.stationId"
+                        :start_time="label_data.startTime" :end_time="label_data.endTime">
+        </LabelLineChart>
       </el-form>
 
       <div slot="footer" class="dialog-footer">
 
-        <LabelLineChart :station_id="label_data.stationId" :startTime="label_data.startTime" :endTime="label_data.endTime">
-        </LabelLineChart>
-
         <el-button @click="dialogLabelVisible = false">Dismiss</el-button>
-        <el-button type="danger" @click="dialogLabelVisible = false">Delete</el-button>
-        <el-button type="primary" @click="dialogLabelVisible = false">Update</el-button>
+        <el-button type="danger" @click="handleDeleteLabel">Delete</el-button>
+        <el-button type="primary" @click="handleModifyLabel">Update</el-button>
       </div>
     </el-dialog>
   </div>
@@ -33,9 +34,9 @@
 
 <script>
     import BrushPannel from './BrushPannel.js'
-    import TargetFeatureValue from './TargetFeatureValue.vue'
+    import LabelLineChart from "./LabelLineChart.vue";
     import pipeService from '../../service/pipeService.js'
-    import LabelLineChart from "./LabelLineChart";
+    import dataService from "../../service/dataService";
     export default {
         name: "BrushPannel",
         props:["mean_error", "label_info"],
@@ -83,6 +84,25 @@
             handleLabelClick(data) {
                 this.label_data = data;
                 this.dialogLabelVisible = true;
+            },
+            handleModifyLabel(){
+                this.dialogLabelVisible = false;
+                let para = {
+                    'id': this.label_data.id, 'username': this.label_data.userName, 'label': this.label_data.label,
+                    'feature': this.label_data.feature, 'startTime': this.startTimeToUpdate, 'endTime': this.endTimeToUpdate,
+                    'StationId': this.label_data.stationId, 'type': this.label_data.labelType
+                };
+                dataService.modifyLabelValue(para);
+                dataService.loadLabelValue({'username': this.label_data.userName, 'feature': 'PM25'}, (data)=>{
+                    this.label_info = data;
+                });
+            },
+            handleDeleteLabel(){
+                this.dialogLabelVisible = false;
+                dataService.deleteLabel({'id': this.label_data.id});
+                dataService.loadLabelValue({'username': this.label_data.userName, 'feature': 'PM25'}, (data)=>{
+                    this.label_info = data;
+                });
             }
         },
         components: {

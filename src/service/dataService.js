@@ -112,6 +112,15 @@ function loadMeanError(param, callback){
   })
 }
 
+function loadLabelValue(param, callback){
+  const url = `${dataServerUrl}/load_labels`
+  $http.post(url, param).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+
 function saveLabelValue(param, callback){
   const url = `${dataServerUrl}/save_labels`
   $http.post(url, param).then(response => {}, errResponse => {
@@ -119,11 +128,16 @@ function saveLabelValue(param, callback){
   })
 }
 
-function loadLabelValue(param, callback){
-  const url = `${dataServerUrl}/load_labels`
-  $http.post(url, param).then(response => {
-    callback(response.data)
-  }, errResponse => {
+function modifyLabelValue(param, callback){
+  const url = `${dataServerUrl}/modify_labels`
+  $http.post(url, param).then(response => {}, errResponse => {
+    console.log(errResponse)
+  })
+}
+
+function deleteLabel(param, callback){
+  const url = `${dataServerUrl}/delete_labels`
+  $http.post(url, param).then(response => {}, errResponse => {
     console.log(errResponse)
   })
 }
@@ -138,6 +152,8 @@ export default{
   loadFeatureValue,
   loadModelValue,
   loadMeanError,
+  loadLabelValue,
   saveLabelValue,
-  loadLabelValue
+  modifyLabelValue,
+  deleteLabel
 }

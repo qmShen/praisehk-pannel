@@ -84,7 +84,7 @@ BrushPannel.prototype.render_labels = function(label_info){
   let dateRange = [new Date(globalStart * 1000), new Date(globalEnd * 1000)];
   let _xscale = d3.scaleTime().range([0, this.svgWidth - this.margin.left]).domain(dateRange);
 
-
+  this.labels.selectAll('.label_triangle').remove();
   let labels = this.labels.selectAll('.label_triangle')
     .data(label_info)
     .enter()

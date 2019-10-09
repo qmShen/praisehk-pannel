@@ -3,34 +3,51 @@ import * as d3 from 'd3'
 let LabelLineChart = function(el){
   this.$el = el;
   this.svgWidth = this.$el.clientWidth;
-  this.svgHeight = this.$el.clientHeight;
-  this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
-  this.margin = {'top': 10,'bottom': 10, 'left': 10, 'right': 10};
-  this.obsColor = this.colorSchema.obs;
-  this.modelColor = this.colorSchema.model;
+  this.svgHeight = 200;
+  //this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
+  this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', 200);
+  this.margin = {'top': 20,'bottom': 20, 'left': 30, 'right': 10};
+  this.obsColor = "#479886";
+  this.modelColor = '#d77451';
 };
 
 
-LabelLineChart.prototype.setData = function(data){
+LabelLineChart.prototype.setData = function(data, st, et){
   this.data = data;
+  this.startTime = st;
+  this.endTime = et;
   this.render();
+};
+
+LabelLineChart.prototype.on = function(msg, func){
+  if(msg == 'dialogBrushEnd'){
+    this.dialogBrushEnd = func
+  }
+};
+
+let dateToSecs = function(date){
+  return parseInt(date.getTime() / 1000);
 };
 
 LabelLineChart.prototype.render = function(){
   let data = [];
+  let startTimestamp = this.startTime - 24 * 3600 * 2;
+  let endTimestamp = this.startTime + 24 * 3600 * 4;
   this.data.forEach(d=>{
-    if(d.timestamp > this.startTime && d.timestamp < this.endTime){
+    if(d.timestamp > startTimestamp && d.timestamp < endTimestamp){
       d['time'] = new Date(d.timestamp * 1000);
       data.push(d)
     }
   });
-  this.svg.selectAll('g').remove();
-  this.container = this.svg.append('g');
-  var xExtent = d3.extent(data, d => d.time);
-  var xScale = d3.scaleTime()
-    .domain(xExtent).range([0, this.svgWidth - this.margin.right - this.margin.left]);
 
-  this.xScale = xScale;
+  this.svg.selectAll('g').remove();
+  this.container = this.svg.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')')
+  let dateRange = [new Date(startTimestamp * 1000), new Date(endTimestamp * 1000)];
+  this.xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);
+
+  let _this = this;
+  let xScale = this.xScale;
+
   var xAxis = d3.axisBottom().scale(xScale).tickFormat(d=>{
     return   d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' +  d.getHours() + ":00";
   });
@@ -51,7 +68,7 @@ LabelLineChart.prototype.render = function(){
       return yScale(d.val_cmaq)
     });
 
-  let cmaq_container = this.container.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
+  let cmaq_container = this.container.append('g');
   cmaq_container.selectAll('path')
     .data([data]).enter().append('path')
     .attr('d', cmaq_line)
@@ -67,7 +84,7 @@ LabelLineChart.prototype.render = function(){
     .attr('class', 'yAxis')
     .call(yAxis);
 
-  let obs_container = this.container.append('g').attr('transform', 'translate(40,0)');
+  let obs_container = this.container.append('g');
 
   obs_container.selectAll('circle')
     .data(data).enter().append('circle')
@@ -87,40 +104,19 @@ LabelLineChart.prototype.render = function(){
     });
 
   // Time Brush
-  this.setTimeBrush();
-};
-
-
-LabelLineChart.prototype.on = function(msg, func){
-  if(msg == 'dialogBrushEnd'){
-    this.dialogBrushEnd = func
-  }
-};
-
-let dateToSecs = function(date){
-  return parseInt(date.getTime() / 1000);
-};
-
-LabelLineChart.prototype.setTimeBrush = function(){
-  let _this = this;
-  let startTimestamp = this.startTime - 24 * 3600 * 1.5;
-  let endTimestamp = this.startTime + 24 * 3600 * 3;
-  let dateRange = [new Date(startTimestamp * 1000), new Date(endTimestamp * 1000)];
-  this.xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);
-  let xScale = this.xScale;
-
   var brush = d3.brushX()
-    .extent([[0, 0], [this.svgWidth - this.margin.left - this.margin.right, this.svgHeight]])
+    .extent([[this.margin.left, this.margin.top], [this.svgWidth - this.margin.right, this.svgHeight-this.margin.bottom]])
     .on("end", brushed);
 
-  this.svg.append("g").attr('transform', 'translate(' + [this.margin.left, 0]+')')
+  this.svg.append("g")
     .attr("class", "brush")
     .call(brush)
-    .call(brush.move, [xScale(this.startTime), xScale(this.endTime)]);
+    .call(brush.move, [xScale(this.startTime*1000), xScale(this.endTime*1000)]);
 
   function brushed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-    var s = d3.event.selection || _this.xScale.range();
+    if (d3.event.selection === null) return; // ignore click
+    var s = d3.event.selection || xScale.range();
     let filter_range = s.map(xScale.invert, xScale);
     _this.dialogBrushEnd([dateToSecs(filter_range[0]), dateToSecs(filter_range[1])]);
   }

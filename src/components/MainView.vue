@@ -259,17 +259,16 @@
                 if (this.username == '' || this.username == null || this.username == 'null') {
                     this.$alert('Username is missing. Please refresh to enter your username if you want to record the label.')
                     return;
-                } else if (this.labelName == '' || this.labelName == null || this.labelName == 'null') {
-                    this.$alert('The label cannot be empty. Please enter a label for the selected time interval.')
-                    return;
                 }
 
                 let para = {
                     'username': this.username, 'label': this.labelName, 'feature': 'PM25',
                     'startTime': this.labelStartTime, 'endTime': this.labelEndTime, 'StationId': this.labelStationId, 'type': this.selected
                 };
-                console.log(para);
                 dataService.saveLabelValue(para);
+                dataService.loadLabelValue({'username': this.username, 'feature': 'PM25'}, (data)=>{
+                    this.label_info = data;
+                });
             },
             toggleAnimation:function(){
                 this.isButtonClicked = !this.isButtonClicked;
@@ -302,7 +301,7 @@
                 }else{
                     this.dialogVisible = false;
 
-                    dataService.loadLabelValue({'username': 'jason', 'feature': 'PM25'}, (data)=>{
+                    dataService.loadLabelValue({'username': this.username, 'feature': 'PM25'}, (data)=>{
                         this.label_info = data;
                     });
                 }
