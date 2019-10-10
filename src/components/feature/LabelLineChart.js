@@ -1,4 +1,5 @@
 import * as d3 from 'd3'
+import pipeService from "../../service/pipeService";
 
 let LabelLineChart = function(el){
   this.$el = el;
@@ -19,6 +20,12 @@ LabelLineChart.prototype.setData = function(data, st, et){
   this.render();
 };
 
+LabelLineChart.prototype.setTime = function(st, et){
+  this.startTime = st;
+  this.endTime = et;
+  this.render();
+}
+
 LabelLineChart.prototype.on = function(msg, func){
   if(msg == 'dialogBrushEnd'){
     this.dialogBrushEnd = func
@@ -31,8 +38,8 @@ let dateToSecs = function(date){
 
 LabelLineChart.prototype.render = function(){
   let data = [];
-  let startTimestamp = this.startTime - 24 * 3600 * 2;
-  let endTimestamp = this.startTime + 24 * 3600 * 4;
+  let startTimestamp = this.startTime - 24 * 3600 * 3;
+  let endTimestamp = this.startTime + 24 * 3600 * 7;
   this.data.forEach(d=>{
     if(d.timestamp > startTimestamp && d.timestamp < endTimestamp){
       d['time'] = new Date(d.timestamp * 1000);
@@ -41,7 +48,7 @@ LabelLineChart.prototype.render = function(){
   });
 
   this.svg.selectAll('g').remove();
-  this.container = this.svg.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')')
+  this.container = this.svg.append('g');
   let dateRange = [new Date(startTimestamp * 1000), new Date(endTimestamp * 1000)];
   this.xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);
 
@@ -52,9 +59,7 @@ LabelLineChart.prototype.render = function(){
     return   d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' +  d.getHours() + ":00";
   });
 
-  var yMax = d3.max([d3.max(data, d => d.val_aq), d3.max(data, d => d.val_cmaq)]);
-  this.yMax = yMax;
-  this.yMax = 100; // Given by domain expert
+  this.yMax = 200; // Given by domain expert
   var yScale = d3.scaleLinear()
     .domain([0,  this.yMax]).range([this.svgHeight - this.margin.bottom, this.margin.top]);
   var yAxis = d3.axisLeft().scale(yScale);
@@ -68,7 +73,7 @@ LabelLineChart.prototype.render = function(){
       return yScale(d.val_cmaq)
     });
 
-  let cmaq_container = this.container.append('g');
+  let cmaq_container = this.container.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
   cmaq_container.selectAll('path')
     .data([data]).enter().append('path')
     .attr('d', cmaq_line)
@@ -84,7 +89,7 @@ LabelLineChart.prototype.render = function(){
     .attr('class', 'yAxis')
     .call(yAxis);
 
-  let obs_container = this.container.append('g');
+  let obs_container = this.container.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
 
   obs_container.selectAll('circle')
     .data(data).enter().append('circle')
@@ -105,10 +110,10 @@ LabelLineChart.prototype.render = function(){
 
   // Time Brush
   var brush = d3.brushX()
-    .extent([[this.margin.left, this.margin.top], [this.svgWidth - this.margin.right, this.svgHeight-this.margin.bottom]])
+    .extent([[0, this.margin.top], [this.svgWidth - this.margin.left - this.margin.right, this.svgHeight-this.margin.bottom]])
     .on("end", brushed);
 
-  this.svg.append("g")
+  this.svg.append("g").attr('transform', 'translate(' + [this.margin.left, 0]+')')
     .attr("class", "brush")
     .call(brush)
     .call(brush.move, [xScale(this.startTime*1000), xScale(this.endTime*1000)]);

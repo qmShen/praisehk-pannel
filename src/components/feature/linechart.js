@@ -7,7 +7,7 @@ let BrushLineChart = function(el, colorSchema){
   this.svgWidth = this.$el.clientWidth ;
   this.svgHeight = this.$el.clientHeight - 20;
   this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
-  this.margin = {'top': 20,'bottom': 20, 'left': 40, 'right':0};
+  this.margin = {'top': 20,'bottom': 20, 'left': 30, 'right':10};
   this.obsColor = colorSchema.obs;
   this.modelColor = colorSchema.model;
 };
@@ -33,18 +33,17 @@ BrushLineChart.prototype.render = function(){
   });
   this.svg.selectAll('g').remove();
   this.container = this.svg.append('g');
-  var xExtent = d3.extent(data, d => d.time);
-  var xScale = d3.scaleTime()
-    .domain(xExtent).range([0, this.svgWidth - this.margin.right - this.margin.left]);
+  let dateRange = [new Date(this.timerange[0] * 1000), new Date(this.timerange[1] * 1000)];
+  this.xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);
+  let xScale = this.xScale;
 
-  this.xScale = xScale;
   var xAxis = d3.axisBottom().scale(xScale).tickFormat(d=>{
     return   d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' +  d.getHours() + ":00";
   });
 
   var yMax = d3.max([d3.max(data, d => d.val_aq), d3.max(data, d => d.val_cmaq)]);
   this.yMax = yMax;
-  this.yMax = 100; // Given by domain expert
+  this.yMax = 200; // Given by domain expert
   var yScale = d3.scaleLinear()
     .domain([0,  this.yMax]).range([this.svgHeight - this.margin.bottom, this.margin.top]);
   var yAxis = d3.axisLeft().scale(yScale);
@@ -74,7 +73,7 @@ BrushLineChart.prototype.render = function(){
     .attr('class', 'yAxis')
     .call(yAxis);
 
-  let obs_container = this.container.append('g').attr('transform', 'translate(40,0)');
+  let obs_container = this.container.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
 
   obs_container.selectAll('circle')
     .data(data).enter().append('circle')
@@ -129,12 +128,12 @@ BrushLineChart.prototype.setTimeBrush = function(startTimestamp, endTimestamp){
   let _this = this;
   startTimestamp = startTimestamp == undefined? 1451739600: startTimestamp;
   endTimestamp = endTimestamp == undefined? 1451750400: endTimestamp;
-  let dateRange = [new Date(startTimestamp * 1000), new Date(endTimestamp * 1000)];
-  this.xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left]).domain(dateRange);
-  let xScale = this.xScale;
+
+  let dateRange = [new Date(this.timerange[0] * 1000), new Date(this.timerange[1] * 1000)];
+  let xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);;
 
   var brush = d3.brushX()
-    .extent([[0, 0], [this.svgWidth - this.margin.left, this.svgHeight]])
+    .extent([[0, 0], [this.svgWidth - this.margin.left - this.margin.right, this.svgHeight]])
     .on("end", brushed);
 
   this.svg.append("g").attr('transform', 'translate(' + [this.margin.left, 0]+')')
@@ -144,7 +143,7 @@ BrushLineChart.prototype.setTimeBrush = function(startTimestamp, endTimestamp){
 
   function brushed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-    var s = d3.event.selection || _this.xScale.range();
+    var s = d3.event.selection || xScale.range();
     let filter_range = s.map(xScale.invert, xScale);
     _this.brushEnd([dateToSecs(filter_range[0]), dateToSecs(filter_range[1]), _this.stationId]);
   }

@@ -17,6 +17,9 @@ var pipeService = new Vue({
     TIMERANGESELECTED : 'time_range_selected',
     TIMERANGEBRUSHED: 'time_range_brushed',
     DIALOGTIMERANGEBRUSHED: 'dialog_time_range_brushed',
+
+    LABELUPDATE: 'label_update',
+    LABELLINECHARTUPDATE: 'label_line_chart_update',
   },
 
   methods:{
@@ -141,6 +144,19 @@ var pipeService = new Vue({
     onDialogTimeRangeBrushed: function(callback){
       this.$on(this.DIALOGTIMERANGEBRUSHED, function(msg){
         callback(msg);
+      })
+    },
+
+
+    //------------------------------------------------------------
+    //When time range in time series view is selected this will triger
+    //msg{start: sec, end: sec}
+    emitLabelUpdate: function(){
+      this.$emit(this.LABELUPDATE);
+    },
+    onLabelUpdate: function(callback){
+      this.$on(this.LABELUPDATE, function(){
+        callback();
       })
     },
 

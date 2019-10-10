@@ -78,10 +78,16 @@
     <el-dialog
       title="Enter username:" center
       :visible.sync="dialogVisible"
-      width="20%"
+      width="30%"
       :before-close="handleClose">
-      <span>Please input your user name:</span>
-      <el-input size = "mini" style="margin-top: 25px"  v-model="username" placeholder="User name:" @keyup.enter.native="handleClose"></el-input>
+
+      <span>Please input your user name (case insensitive):</span>
+      <el-input size = "mini" style="margin-top: 10px"  v-model="username" placeholder="Username" @keyup.enter.native="handleClose"></el-input>
+
+      <span>Station of Interest:</span>
+        <el-select style="margin-top: 10px" v-model="labelQueryId" placeholder="Select...">
+          <el-option v-for="(station, index) in labelHKStation" :key="index" :label="labelHKStationDict[station]" :value="station"></el-option>
+        </el-select>
       <span  slot="footer" class="dialog-footer">
         <el-button style="margin-top: -10px" size = "mini" type="primary" @click="handleClose">Confirm</el-button>
       </span>
@@ -138,6 +144,14 @@
                 labelStartTime: null,
                 labelEndTime: null,
                 labelStationId: null,
+                labelQueryId: null,
+                labelHKStation: [67, 68, 70, 74, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 87, 90],
+                labelHKStationDict: {
+                    '83': 'CB_R', '78': 'CL_R', '81': 'MKaR', '77': 'CW_A',
+                    '84': 'EN_A', '76': 'KC_A', '85': 'KT_A', '82': 'ST_A',
+                    '79': 'SP_A', '80': 'TP_A', '90': 'MB_A', '87': 'TK_A',
+                    '74': 'TW_A', '68': 'TM_A', '67': 'TC_A', '70': 'YL_A',
+                },
                 types:['other', 'lead', 'lag', 'over', 'under'],
                 selected:'other',
                 featureList:['NO2', 'PM25'],
@@ -155,6 +169,12 @@
 
             dataService.loadMeanError({'startTime': 1451739600, 'endTime': 1546261200, 'feature': this.selectFeature}, (data)=>{
                 this.mean_error = data;
+            });
+
+            pipeService.onLabelUpdate(()=>{
+                dataService.loadLabelValue({'username': this.username, 'feature': this.selectFeature, 'station': this.labelQueryId}, (data)=>{
+                    this.label_info = data;
+                });
             });
 
             pipeService.onTimeRangeSelected(range=>{
@@ -284,13 +304,11 @@
                 }
 
                 let para = {
-                    'username': this.username, 'label': this.labelName, 'feature': 'PM25',
+                    'username': this.username, 'label': this.labelName, 'feature': this.selectFeature,
                     'startTime': this.labelStartTime, 'endTime': this.labelEndTime, 'StationId': this.labelStationId, 'type': this.selected
                 };
                 dataService.saveLabelValue(para);
-                dataService.loadLabelValue({'username': this.username, 'feature': 'PM25'}, (data)=>{
-                    this.label_info = data;
-                });
+                pipeService.emitLabelUpdate();
             },
             toggleAnimation:function(){
                 this.isButtonClicked = !this.isButtonClicked;
@@ -322,10 +340,7 @@
                         });
                 }else{
                     this.dialogVisible = false;
-
-                    dataService.loadLabelValue({'username': this.username, 'feature': 'PM25'}, (data)=>{
-                        this.label_info = data;
-                    });
+                    pipeService.emitLabelUpdate();
                 }
             }
         },

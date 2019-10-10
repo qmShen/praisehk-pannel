@@ -19,11 +19,10 @@ let dateToSecs = function(date){
   return parseInt(date.getTime() / 1000);
 };
 let BrushPannel = function(el) {
-
   this.$el = el;
   this.svgWidth = this.$el.clientWidth ;
   this.svgHeight = this.$el.clientHeight;
-  this.margin = {'top': 0,'bottom': 20, 'left': 40, 'right':0};
+  this.margin = {'top': 0,'bottom': 20, 'left': 30, 'right': 10};
   this.svg = d3.select(el).append('svg')
     .attr('width', this.svgWidth)
     .attr('height', this.svgHeight)
@@ -54,17 +53,12 @@ BrushPannel.prototype.render_error = function(mean_error){
   t.clearRect(0, 0, this.svgWidth, this.svgHeight);
 
   let n_time = (globalEnd - globalStart)/3600
-  let error_width = (this.svgWidth - this.margin.left)/n_time
+  let error_width = (this.svgWidth - this.margin.left - this.margin.right)/n_time
   let error_height = this.svgHeight - this.margin.bottom - (this.svgHeight)/5
 
   let colorScale = d3.scaleQuantile()
     .domain(domain)
     .range(this.colors);
-
-  let fakedata = new Array();
-  for(let i=0; i<n_time;i++){
-    fakedata[i] = i*100/n_time
-  }
 
   for(let i=0;i<n_time;i++){
     var fillColor = colorScale(mean_error[i]['error'])
@@ -89,7 +83,7 @@ BrushPannel.prototype.render_labels = function(label_info){
   let margin = this.margin.left;
 
   let dateRange = [new Date(globalStart * 1000), new Date(globalEnd * 1000)];
-  let _xscale = d3.scaleTime().range([0, this.svgWidth - this.margin.left]).domain(dateRange);
+  let _xscale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);
 
   this.labels.selectAll('.label_triangle').remove();
   let labels = this.labels.selectAll('.label_triangle')
@@ -101,6 +95,7 @@ BrushPannel.prototype.render_labels = function(label_info){
       return 'translate(' + (margin+_xscale(d['startTime']*1000)) + ', ' + label_size/2 + ') rotate(180)';
     })
     .attr('d', symbolGenerator.type(d3['symbolTriangle']))
+    .attr('stroke', 'black')
     .style('fill', "#d77451");
 
   let _this = this;
@@ -126,20 +121,18 @@ BrushPannel.prototype.initTimeBrush = function(startTimestamp, endTimestamp){
   startTimestamp = startTimestamp == undefined? globalStart: startTimestamp;
   endTimestamp = endTimestamp == undefined? globalEnd: endTimestamp;
   let dateRange = [new Date(startTimestamp * 1000), new Date(endTimestamp * 1000)];
-  this.xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left]).domain(dateRange);
+  this.xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);
   let xScale = this.xScale;
 
 
   var brush = d3.brushX()
-    .extent([[0, 0], [this.svgWidth - this.margin.left, this.svgHeight]])
+    .extent([[0, 0], [this.svgWidth - this.margin.left - this.margin.right, this.svgHeight]])
     .on("end", brushed);
 
   let brushHanlder = this.context.append("g").attr('transform', 'translate(' + [this.margin.left, this.svgHeight/5]+')')
     .attr("class", "brush")
     .call(brush)
     .call(brush.move, [0, this.svgWidth / 28]);
-
-
 
   var xAxis = d3.axisBottom().scale(this.xScale);
 
@@ -168,15 +161,6 @@ BrushPannel.prototype.initTimeBrush = function(startTimestamp, endTimestamp){
     }
 
   }
-};
-
-BrushLineChart.prototype.setSavedLabels = function(t){
-  let x = this.xScale(new Date(t * 1000));
-  this.currentTimeLine = obs_container.append('line')
-    .attr('stroke-width', 0)
-    .attr("x1", 0).attr("y1",0).attr("x2", 0).attr("y2", 0);
-  this.currentTimeLine.style("stroke", '#984a23').attr('stroke-width', 1)
-    .attr("x1", x).attr("y1", this.margin['top']).attr("x2", x).attr("y2", this.svgHeight - this.margin['bottom']);
 };
 
 export default BrushPannel

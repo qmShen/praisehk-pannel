@@ -11,6 +11,17 @@ let HongKongStationList = [67, 68, 70, 74, 77, 78, 79, 80, 81, 82, 83, 84, 85, 8
 let HongKongStationMap = {};
 HongKongStationList.forEach(d=>HongKongStationMap[d] = true);
 
+let HongKongStationRoadList = [78, 81, 83];
+let HongKongStationRoadMap = {};
+HongKongStationRoadList.forEach(d=>HongKongStationRoadMap[d] = true);
+
+let HongKongStationDict = {
+  '83': 'CB_R', '78': 'CL_R', '81': 'MKaR', '77': 'CW_A',
+  '84': 'EN_A', '76': 'KC_A', '85': 'KT_A', '82': 'ST_A',
+  '79': 'SP_A', '80': 'TP_A', '90': 'MB_A', '87': 'TK_A',
+  '74': 'TW_A', '68': 'TM_A', '67': 'TC_A', '70': 'YL_A',
+};
+
 let format_date = function(date){
   let month = date.getMonth() >= 9?date.getMonth() + 1:'0' + (date.getMonth() + 1);
   let day = date.getDate() >= 10?date.getDate():'0' + date.getDate();
@@ -43,20 +54,23 @@ FeatureHeatmap.prototype.update = function(featureObj){
   let _item = featureObj['value'][0];
   this.station_list = [];
   let HongKongStation = [];
+  let HongKongRoadStation = [];
   let OtherStation = [];
   this.AQStations.forEach(d=>{
     let key = d['id'];
-    if(key == 'timestamp') return
-    if(HongKongStationMap[key] == true){
-      HongKongStation.push(key);
+    if(key === 'timestamp') return;
+    if(HongKongStationMap[key] === true){
+      if ( HongKongStationRoadMap[key] === true )
+        HongKongRoadStation.push(key);
+      else
+        HongKongStation.push(key);
     }else{
       OtherStation.push(key);
     }
   });
 
-  this.station_list = HongKongStation.concat(OtherStation);
+  this.station_list = HongKongRoadStation.concat(HongKongStation).concat(OtherStation);
   this.feature = featureObj['feature'];
-  console.log('feature', this.feature)
   this.valueArray = featureObj['value'];
 
   console.log('featureObject', featureObj);
@@ -121,8 +135,6 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
 
   let xScale = d3.scaleLinear().domain(timeRange).range([0, _this.svgWidth - _this.margin['right'] - _this.margin.left - 10]);
 
-
-  let colorBucketes = this.colors.length;
   let domain = []
   if(this.feature == 'NO2'){
     domain = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
@@ -148,7 +160,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
     let _container = d3.select(this);
 
     if(_this.HongKongSatationIdMap[stationId] == true){
-      _container.append('circle').attr('cx', -1 * 1 * unitWidth).attr('cy', unitWidth / 2).attr('r',unitWidth / 3).attr('fill','grey')
+      _container.append('circle').attr('cx', -1 * unitWidth).attr('cy', unitWidth / 2).attr('r',unitWidth / 3).attr('fill','grey')
     }
 
     if(_this.stationTimeMap[stationId] == undefined){
@@ -182,6 +194,8 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
       .attr('stroke-width', 1);
 
     rects.append('title').text(d=>{
+      let _id = stationId in HongKongStationDict? HongKongStationDict[stationId]: stationId;
+
       let value = d[stationId];
       if(d[stationId] == null || d[stationId] == 'null'){
         value = 'Null'
@@ -190,7 +204,7 @@ FeatureHeatmap.prototype.renderHeatmap = function(valueArray){
         value = parseInt(value * 100) / 100;
       }
       // return d.timestamp;
-      return 'Id: '+ stationId + ' error: ' + value + '\nTimestamp: ' + format_date(new Date(d.timestamp * 1000));
+      return 'Id: '+ _id + ' error: ' + value + '\nTimestamp: ' + format_date(new Date(d.timestamp * 1000));
     });
     rects.on('mouseover', function(d){
       _this.mouseover({

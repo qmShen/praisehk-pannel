@@ -14,21 +14,24 @@
         props:['station_id', 'start_time', 'end_time', 'selectFeature'],
         watch:{
             station_id: function(new_data) {
-                this.queryModelObs();
-            },
-        },
-        mounted:function(){
-            this.LineChart = new LabelLineChart(this.$el);
-            this.LineChart.on('dialogBrushEnd', this.handleBrushEnd);
-            this.queryModelObs();
-        },
-        methods:{
-            queryModelObs(){
                 let para = {'feature': this.selectFeature, 'stationId': this.station_id};
                 dataService.loadCMAQOBSData(para, d=>{
                     this.LineChart.setData(d, this.start_time, this.end_time);
                 });
             },
+            start_time: function(new_data) {
+                this.LineChart.setTime(this.start_time, this.end_time);
+            }
+        },
+        mounted:function(){
+            this.LineChart = new LabelLineChart(this.$el);
+            this.LineChart.on('dialogBrushEnd', this.handleBrushEnd);
+
+            dataService.loadCMAQOBSData({'feature': this.selectFeature, 'stationId': this.station_id}, d=>{
+                this.LineChart.setData(d, this.start_time, this.end_time);
+            });
+        },
+        methods:{
             handleBrushEnd(timerange){
                 pipeService.emitDialogTimeRangeBrushed(timerange);
             },
