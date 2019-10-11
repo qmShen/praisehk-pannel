@@ -1,17 +1,12 @@
 import * as d3 from 'd3'
-import pipeService from "../../service/pipeService";
 
 let TimeLabelLineChart = function(el){
   this.$el = el;
   this.svgWidth = this.$el.clientWidth;
   this.svgHeight = 200;
-  //this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
-  this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', 200);
+  this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
   this.margin = {'top': 20,'bottom': 20, 'left': 30, 'right': 10};
-  this.obsColor = "#479886";
-  this.modelColor = '#d77451';
 };
-
 
 TimeLabelLineChart.prototype.setData = function(data, st, et){
   this.data = data;
@@ -24,10 +19,10 @@ TimeLabelLineChart.prototype.setTime = function(st, et){
   this.startTime = st;
   this.endTime = et;
   this.render();
-}
+};
 
 TimeLabelLineChart.prototype.on = function(msg, func){
-  if(msg == 'dialogBrushEnd'){
+  if(msg === 'dialogBrushEnd'){
     this.dialogBrushEnd = func
   }
 };
@@ -36,10 +31,21 @@ let dateToSecs = function(date){
   return parseInt(date.getTime() / 1000);
 };
 
+let featureYMax = {
+  'PM25': 100,
+  'NO2': 200
+};
+
 TimeLabelLineChart.prototype.render = function(){
-  let data = [];
+  let _this = this;
+
+  // 3 days before the label start date, 7 days after
   let startTimestamp = this.startTime - 24 * 3600 * 3;
   let endTimestamp = this.startTime + 24 * 3600 * 7;
+  let dateRange = [new Date(startTimestamp * 1000), new Date(endTimestamp * 1000)];
+
+  // Get all data that are within the time frame
+  let data = [];
   this.data.forEach(d=>{
     if(d.timestamp > startTimestamp && d.timestamp < endTimestamp){
       d['time'] = new Date(d.timestamp * 1000);
@@ -47,69 +53,60 @@ TimeLabelLineChart.prototype.render = function(){
     }
   });
 
+  // Re-rendering
   this.svg.selectAll('g').remove();
-  this.container = this.svg.append('g');
-  let dateRange = [new Date(startTimestamp * 1000), new Date(endTimestamp * 1000)];
-  this.xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);
+  let container = this.svg.append('g');
 
-  let _this = this;
-  let xScale = this.xScale;
+  // scale of x-axis of the chart
+  let xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);
 
-  var xAxis = d3.axisBottom().scale(xScale).tickFormat(d=>{
-    return   d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' +  d.getHours() + ":00";
-  });
+  // scale of y-axis of the chart
+  let yMax = featureYMax[this.selectFeature];
+  let yScale = d3.scaleLinear()
+    .domain([0, yMax]).range([this.svgHeight - this.margin.bottom, this.margin.top]);
 
-  this.yMax = 200; // Given by domain expert
-  var yScale = d3.scaleLinear()
-    .domain([0,  this.yMax]).range([this.svgHeight - this.margin.bottom, this.margin.top]);
-  var yAxis = d3.axisLeft().scale(yScale);
-
-  var cmaq_line = d3.line()
+  // plot CMAQ data
+  let cmaq_container = container.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
+  let cmaq_line = d3.line()
     .x(d => xScale(d.time))
     .y(d => {
-      if(d.val_cmaq == null || d.val_cmaq == 'null'){
-        return yScale(0)
-      }
-      return yScale(d.val_cmaq)
+      return (d.val_cmaq == null || d.val_cmaq === 'null')? yScale(0): yScale(d.val_cmaq);
     });
-
-  let cmaq_container = this.container.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
   cmaq_container.selectAll('path')
     .data([data]).enter().append('path')
     .attr('d', cmaq_line)
     .attr('fill', 'none')
-    .attr('stroke', this.modelColor);
+    .attr('stroke', this.colorScheme.model);
 
+  let xAxis = d3.axisBottom().scale(xScale).tickFormat(d => {
+    return d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ":00";
+  });
   cmaq_container.append('g')
     .attr('class', 'xAxis')
     .call(xAxis)
     .attr('transform', 'translate('+[0, this.svgHeight - this.margin.bottom] +')');
 
+  let yAxis = d3.axisLeft().scale(yScale);
   cmaq_container.append('g')
     .attr('class', 'yAxis')
     .call(yAxis);
 
-  let obs_container = this.container.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
+
+  let obs_container = container.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
 
   obs_container.selectAll('circle')
     .data(data).enter().append('circle')
     .attr('cx', d=>xScale(d.time))
     .attr('cy', d=>{
-      if(d.val_aq == 'null' || d.val_aq == undefined){
-        return yScale(this.yMax);
-      }
-      return yScale(d.val_aq)
+      return (d.val_aq === undefined || d.val_aq === 'null' )? yScale(yMax): yScale(d.val_aq);
     })
     .attr('r',1.5)
     .attr('fill', d=>{
-      if(d.val_aq == 'null' || d.val_aq == undefined){
-        return 'grey'
-      }
-      return this.obsColor
+      return (d.val_aq === undefined || d.val_aq === 'null' )? 'grey': this.colorScheme.obs;
     });
 
   // Time Brush
-  var brush = d3.brushX()
+  let brush = d3.brushX()
     .extent([[0, this.margin.top], [this.svgWidth - this.margin.left - this.margin.right, this.svgHeight-this.margin.bottom]])
     .on("end", brushed);
 
@@ -121,7 +118,7 @@ TimeLabelLineChart.prototype.render = function(){
   function brushed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
     if (d3.event.selection === null) return; // ignore click
-    var s = d3.event.selection || xScale.range();
+    let s = d3.event.selection || xScale.range();
     let filter_range = s.map(xScale.invert, xScale);
     _this.dialogBrushEnd([dateToSecs(filter_range[0]), dateToSecs(filter_range[1])]);
   }

@@ -11,7 +11,7 @@
     <el-row :gutter="10" class="horizontal_stripe">
       <el-col :span="8" class="left">
         <AQMap
-          :colorSchema="colorSchema"
+          :colorSchema="colorScheme"
           :stations="stationAQList"
           :centerLoc="centerLoc"
           :AQFeatureValue="dataFeatureAQ"
@@ -21,7 +21,7 @@
           style="height: 50%; width: 100%"
         />
         <MeteMap
-          :colorSchema="colorSchema"
+          :colorSchema="colorScheme"
           :stations="stationMeteList"
           :centerLoc="centerLoc"
           :WindFeatureValue = "dataFeatureWind"
@@ -34,24 +34,25 @@
       </el-col>
       <el-col :span="16" class="right">
         <TimeLabelPanel
-          :globalStartTime="globalStartTime"
-          :globalEndTime="globalEndTime"
-          :hkStationDict="HKStationDict"
-          :labelTypeList="labelTypeList"
+          :global-start-time="globalStartTime"
+          :global-end-time="globalEndTime"
+          :color-scheme="colorScheme"
+          :hk-station-dict="HKStationDict"
+          :label-type-list="labelTypeList"
           :username="username"
-          :labelQueryId="labelQueryId"
-          :selectFeature="selectFeature"
+          :label-query-id="labelQueryId"
+          :select-feature="selectFeature"
           style="width: 100%; height: 8%;position: relative;" class="boundary">
           <div style="font-size: 10px; position:absolute; right: 0">Username: {{username}}</div>
         </TimeLabelPanel>
-        <TargetFeatureValue
+        <FeatureLineChart
           style="width: 100%; height: 17%; position: relative" class="boundary"
-          :colorSchema="colorSchema"
-          :currentTime="currentTime"
-          :selectFeature="selectFeature"
+          :color-scheme="colorScheme"
+          :current-time="currentTime"
+          :select-feature="selectFeature"
           v-loading="AQMapLoading" element-loading-text="Loading" element-loading-background="rgba(0, 0, 0, 0.4)">
           <div style="position: absolute; right: 10px; top: 25px" >
-            <el-button type="success" icon="el-icon-video-play" size="mini"  v-bind:disabled="buttonDisable" v-on:click="toggleAnimation" plain></el-button>
+            <el-button type="success" icon="el-icon-video-play" size="mini"  v-bind:disabled="buttonDisable" v-on:click="toggleAnimation" circle></el-button>
             <input type="text" v-model="labelName" size="10" style="height: 20px" placeholder="label name"></input>
 
             <select v-model="selected" style="height: 26px">
@@ -59,16 +60,19 @@
               <option v-for="item in labelTypeList">{{item}}</option>
             </select>
 
-            <el-button type="success" icon="el-icon-upload" size="mini"  v-on:click="saveTimeInterval" plain></el-button>
+            <el-button type="primary" icon="el-icon-edit" size="mini"  v-on:click="saveTimeInterval" circle></el-button>
           </div>
-        </TargetFeatureValue>
+        </FeatureLineChart>
+
         <div style="width: 100%; height: calc(75%); " class="boundary"
+             :currentTime="currentTime"
              v-loading="AQMapLoading"
-             v-bind:currentTime="currentTime"
              element-loading-text="Loading"
              element-loading-background="rgba(0, 0, 0, 0.4)" >
-          <FeatureHeatmap style="width: 100%; height: calc(100% );" v-for="item in featureValues" v-bind:item="item" v-bind:key="item.feature" v-bind:AQStations="stationAQList">
-            {{item.feature}}
+          <FeatureHeatmap
+            style="width: 100%; height: calc(100% );"
+            :data-feature-error="dataFeatureError"
+            :station-a-q-list="stationAQList">
           </FeatureHeatmap>
         </div>
       </el-col>
@@ -98,8 +102,8 @@
     import AQMap from './map/AQMap.vue'
     import MeteMap from './map/MeteMap.vue'
     import TimeLabelPanel from './feature/TimeLabelPanel.vue'
-    import FeatureHeatmap from './feature/FeatureHeatmap.vue'
-    import TargetFeatureValue from './feature/FeatureLineChart.vue'
+    import FeatureHeatmap from './feature/FeatureHeatMap.vue'
+    import FeatureLineChart from './feature/FeatureLineChart.vue'
 
     import pipeService from '../service/pipeService.js'
     import dataService from '../service/dataService.js'
@@ -120,12 +124,13 @@
                 },
                 featureList: ['NO2', 'PM25'],
                 labelTypeList: ['other', 'lead', 'lag', 'over', 'under'],
-                colorSchema:{'obs': "#479886", 'model': '#d77451'},
+                colorScheme:{'obs': "#d77451", 'model': '#479886'},
 
                 // Data
                 stationAQList:[],
                 stationMeteList:[],
-                dataErrorMean:[],
+                dataErrorMean: null,
+                dataFeatureError: null,
                 dataFeatureAQ: null,
                 dataFeatureCMAQ: null,
                 dataFeatureWind: null,
@@ -141,8 +146,7 @@
                 MeteDataN: 0,
                 mapReadyN:0,
 
-
-                featureValues:[],
+                // Not yet classified
                 centerLoc:{loc: [22.3586, 114.1271]},
                 currentTime: null,
                 timeRange:[],
@@ -156,7 +160,6 @@
                 labelEndTime: null,
                 labelStationId: null,
                 labelQueryId: null,
-
                 selected:'other',
                 selectFeature:'NO2',
             }
@@ -176,49 +179,50 @@
             });
 
             pipeService.onTimeRangeSelected(range=>{
+                this.timeRange = range;
                 this.AQMapLoading = true;
                 this.MeteMapLoading = true;
                 this.FeatureValueLoading = true;
-                let para = {'startTime': range[0], 'endTime': range[1], 'feature':this.selectFeature};
 
+                // Three hours average of feature values
+                let para = {'startTime': range[0], 'endTime': range[1], 'feature':this.selectFeature};
                 dataService.loadFeatureData(para, (data)=>{
-                    this.featureValues = data;
+                    this.dataFeatureError = data[0];
                     this.FeatureValueLoading = false;
                 });
 
-                this.timeRange = range;
                 this.AQDataN = 0;
                 this.MeteDataN = 0;
                 this.mapReadyN = 0;
+
+                // Feature values
                 para = {'ids': 'all', 'feature': this.selectFeature, 'timeRange': 1, 'startTime': range[0], 'endTime': range[1]};
                 dataService.loadFeatureValue(para, (data)=>{
                     this.dataFeatureAQ = data;
                     this.AQDataN += 1;
                 });
-
                 dataService.loadModelValue(para, (data)=>{
-
                     this.dataFeatureCMAQ = data;
                     this.AQDataN += 1;
                 });
 
+                // Wind Speed
                 para = {'ids': 'all', 'feature': 'wind', 'timeRange': 1, 'startTime': range[0], 'endTime': range[1]};
                 dataService.loadFeatureValue(para, (data)=>{
                     this.dataFeatureWind = data;
                     this.MeteDataN +=1;
                 });
-
                 dataService.loadModelValue(para, (data)=>{
                     this.dataFeatureWindWRF = data;
                     this.MeteDataN +=1;
                 });
 
+                // Wind direction
                 para = {'ids': 'all', 'feature': 'winddir', 'timeRange': 1, 'startTime': range[0], 'endTime': range[1]};
                 dataService.loadFeatureValue(para, (data)=>{
                     this.dataFeatureWindDir = data;
                     this.MeteDataN +=1;
                 });
-
                 dataService.loadModelValue(para, (data)=>{
                     this.dataFeatureWindDirWRF = data;
                     this.MeteDataN +=1;
@@ -255,7 +259,6 @@
             MeteDataN:function(n){
                 if(n === 4){
                     this.MeteMapLoading = false;
-                    this.FeatureValueLoading = false;
                     this.mapReadyN += 1;
                 }
             },
@@ -285,11 +288,10 @@
                         if(_this.currentTime === undefined){
                             _this.currentTime = _this.timeRange[0]
                         }
-                        this.currentTime  = this.currentTime + 3600;
+                        this.currentTime = this.currentTime + 3600;
                         if(this.currentTime >= this.timeRange[1]){
                             clearInterval(this.timeHandler);
                         }
-
                     }, 1000)
                 } else {
                     clearInterval(this.timeHandler);
@@ -317,7 +319,7 @@
             MeteMap,
             FeatureHeatmap,
             TimeLabelPanel,
-            TargetFeatureValue
+            FeatureLineChart
         }
     }
 </script>

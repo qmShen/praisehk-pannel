@@ -1,5 +1,8 @@
 <template>
-  <div class="boundary">
+  <div
+    v-loading="timeLabelLineChartLoading"
+    element-loading-text="Loading"
+    element-loading-background="rgba(0, 0, 0, 0.4)">
   </div>
 </template>
 
@@ -10,29 +13,45 @@
 
     export default {
         name: "TimeLabelLineChart",
-        props:['station_id', 'start_time', 'end_time', 'selectFeature'],
+        props:{
+            'colorScheme': Object,
+            'stationId': Number,
+            'startTime': Number,
+            'endTime': Number,
+            'selectFeature': String,
+        },
         watch:{
-            station_id: function(new_data) {
-                let para = {'feature': this.selectFeature, 'stationId': this.station_id};
-                dataService.loadCMAQOBSData(para, d=>{
-                    this.LineChart.setData(d, this.start_time, this.end_time);
-                });
+            stationId: function() {
+                this.loadCMAQOBSData();
             },
-            start_time: function(new_data) {
-                this.LineChart.setTime(this.start_time, this.end_time);
+            startTime: function() {
+                this.LineChart.setTime(this.startTime, this.endTime);
+            }
+        },
+        data () {
+            return {
+                timeLabelLineChartLoading: false,
             }
         },
         mounted:function(){
             this.LineChart = new TimeLabelLineChart(this.$el);
+            this.LineChart.colorScheme = this.colorScheme;
+            this.LineChart.selectFeature = this.selectFeature;
             this.LineChart.on('dialogBrushEnd', this.handleBrushEnd);
 
-            dataService.loadCMAQOBSData({'feature': this.selectFeature, 'stationId': this.station_id}, d=>{
-                this.LineChart.setData(d, this.start_time, this.end_time);
-            });
+            this.loadCMAQOBSData();
         },
         methods:{
-            handleBrushEnd(timerange){
-                pipeService.emitDialogTimeRangeBrushed(timerange);
+            loadCMAQOBSData(){
+                this.timeLabelLineChartLoading = true;
+                let para = {'feature': this.selectFeature, 'stationId': this.stationId};
+                dataService.loadCMAQOBSData( para, d => {
+                    this.LineChart.setData(d, this.startTime, this.endTime);
+                    this.timeLabelLineChartLoading = false;
+                });
+            },
+            handleBrushEnd(timeRange){
+                pipeService.emitDialogTimeRangeBrushed(timeRange);
             },
         }
     }
@@ -40,16 +59,4 @@
 
 
 <style scoped>
-  /*svg{*/
-  /*height: 100%;*/
-  /*width: 100%*/
-  /*}*/
-  .line {
-
-  }
-  .zoom {
-    cursor: move;
-    fill: none;
-    pointer-events: all;
-  }
 </style>

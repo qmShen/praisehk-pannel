@@ -5,12 +5,9 @@
 
 import * as d3 from "d3";
 
-let dateToSecs = function(date){
-  return parseInt(date.getTime() / 1000);
-};
-
 let TimeLabelPanel = function(el) {
   this.$el = el;
+
   this.svgWidth = this.$el.clientWidth;
   this.svgHeight = this.$el.clientHeight;
   this.margin = {'top': 0,'bottom': 20, 'left': 30, 'right': 10};
@@ -23,7 +20,6 @@ let TimeLabelPanel = function(el) {
     .attr('width', this.svgWidth)
     .attr('height', this.svgHeight)
     .attr('id', 'error_canvas');
-
   this.labels = this.svg.append("g").attr("class", "labels").attr('height', this.svgHeight/5);
   this.context = this.svg.append("g").attr("class", "context");
 };
@@ -34,12 +30,11 @@ TimeLabelPanel.prototype.colors = [
   "#081d58"
 ];
 
-TimeLabelPanel.prototype.render_error = function(mean_error){
+TimeLabelPanel.prototype.render_error = function(meanErrorData){
   let domain = [0, 5, 10, 15, 20, 25, 30, 35, 40, 50];
 
   let c = document.getElementById("error_canvas");
   let t = c.getContext('2d');
-
   t.clearRect(0, 0, this.svgWidth, this.svgHeight);
 
   let n_time = (this.globalEndTime - this.globalStartTime)/3600;
@@ -51,7 +46,7 @@ TimeLabelPanel.prototype.render_error = function(mean_error){
     .range(this.colors);
 
   for ( let i = 0; i < n_time; i++ ) {
-    let fillColor = colorScale(mean_error[i]['error']);
+    let fillColor = colorScale(meanErrorData[i]['error']);
     drawRect(t,this.margin.left+error_width*i,(this.svgHeight)/5,error_width,error_height,fillColor);
   }
 
@@ -73,7 +68,7 @@ TimeLabelPanel.prototype.render_labels = function(label_info){
   let margin = this.margin.left;
 
   let dateRange = [new Date(this.globalStartTime * 1000), new Date(this.globalEndTime * 1000)];
-  let _xscale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);
+  let xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);
 
   this.labels.selectAll('.label_triangle').remove();
   let labels = this.labels.selectAll('.label_triangle')
@@ -82,7 +77,7 @@ TimeLabelPanel.prototype.render_labels = function(label_info){
     .append('path')
     .attr('class', 'label_triangle')
     .attr('transform', function(d) {
-      return 'translate(' + (margin+_xscale(d['startTime']*1000)) + ', ' + label_size/2 + ') rotate(180)';
+      return 'translate(' + (margin+xScale(d['startTime']*1000)) + ', ' + label_size/2 + ') rotate(180)';
     })
     .attr('d', symbolGenerator.type(d3['symbolTriangle']))
     .attr('stroke', 'black')
@@ -102,6 +97,9 @@ TimeLabelPanel.prototype.on = function(msg, func){
   }
 };
 
+let dateToSecs = function(date){
+  return date.getTime() / 1000;
+};
 
 TimeLabelPanel.prototype.initTimeBrush = function(){
   let _this = this;
@@ -120,7 +118,7 @@ TimeLabelPanel.prototype.initTimeBrush = function(){
 
   this.context.append('g')
     .attr('class', 'xAxis')
-    .call(d3.axisBottom().scale(xScale))
+    .call(d3.axisBottom().scale(xScale).ticks(d3.timeMonth.every(1)))
     .attr('transform', 'translate('+[this.margin.left, this.svgHeight - this.margin.bottom] +')');
 
   function brushed() {
@@ -139,7 +137,6 @@ TimeLabelPanel.prototype.initTimeBrush = function(){
     }else{
       _this.brushEnd([dateToSecs(filter_range[0]), dateToSecs(filter_range[1])])
     }
-
   }
 };
 
