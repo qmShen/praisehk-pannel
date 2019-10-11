@@ -7,24 +7,10 @@ import VueResource from 'vue-resource'
 
 Vue.use(VueResource);
 
-
 const dataServerUrl = "http://127.0.0.1:9950";
 // const dataServerUrl = "/praise-vis";
 
-
-// const dataServerUrl = "/sv-analysis";
-// const dataServerUrl = Config.serverLink == ""? "" : Config.serverLink.substring(0,  Config.serverLink.length - 1);
 const $http = Vue.http;
-
-// function loadAQStations(callback){
-//   const url = `${dataServerUrl}/aq_stations`
-//   $http.get(url).then(response => {
-//     callback(response.data)
-//   }, errResponse => {
-//     console.log(errResponse)
-//   })
-// }
-
 
 
 function loadRegions(callback){
@@ -55,7 +41,6 @@ function loadCMAQOBSData(param, callback){
   })
 }
 
-//  Version 0 --------------------------
 function loadAQStations(callback){
   const url = `${dataServerUrl}/aq_stations`
   $http.get(url).then(response => {
@@ -102,14 +87,14 @@ function loadFeatureErrorValue(callback){
   })
 }
 
-
 function loadMeanError(param, callback){
-  const url = `${dataServerUrl}/load_mean_error`
-      $http.post(url, param).then(response => {
-    callback(response.data)
-  }, errResponse => {
-    console.log(errResponse)
-  })
+  const url = `${dataServerUrl}/load_mean_error`;
+  $http.post(url, param)
+    .then(response => {
+      callback(response.data)
+    }, errResponse => {
+      console.log(errResponse)
+    })
 }
 
 function loadLabelValue(param, callback){

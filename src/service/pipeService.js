@@ -3,7 +3,7 @@
  */
 import Vue from 'vue'
 
-var pipeService = new Vue({
+let pipeService = new Vue({
   data:{
     SELECTEDSCATTER: 'select_scatter_plot',
     SEQUENCESELECTED: 'sequence_selected',

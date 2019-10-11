@@ -1,6 +1,6 @@
 import * as d3 from 'd3'
 import {limitTimeRange} from "element-ui/src/utils/date-util";
-import BrushPannel from "./BrushPannel";
+import TimeLabelPanel from "./TimeLabelPanel";
 
 let BrushLineChart = function(el, colorSchema){
   this.$el = el;

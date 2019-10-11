@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
 import pipeService from "../../service/pipeService";
 
-let LabelLineChart = function(el){
+let TimeLabelLineChart = function(el){
   this.$el = el;
   this.svgWidth = this.$el.clientWidth;
   this.svgHeight = 200;
@@ -13,20 +13,20 @@ let LabelLineChart = function(el){
 };
 
 
-LabelLineChart.prototype.setData = function(data, st, et){
+TimeLabelLineChart.prototype.setData = function(data, st, et){
   this.data = data;
   this.startTime = st;
   this.endTime = et;
   this.render();
 };
 
-LabelLineChart.prototype.setTime = function(st, et){
+TimeLabelLineChart.prototype.setTime = function(st, et){
   this.startTime = st;
   this.endTime = et;
   this.render();
 }
 
-LabelLineChart.prototype.on = function(msg, func){
+TimeLabelLineChart.prototype.on = function(msg, func){
   if(msg == 'dialogBrushEnd'){
     this.dialogBrushEnd = func
   }
@@ -36,7 +36,7 @@ let dateToSecs = function(date){
   return parseInt(date.getTime() / 1000);
 };
 
-LabelLineChart.prototype.render = function(){
+TimeLabelLineChart.prototype.render = function(){
   let data = [];
   let startTimestamp = this.startTime - 24 * 3600 * 3;
   let endTimestamp = this.startTime + 24 * 3600 * 7;
@@ -127,4 +127,4 @@ LabelLineChart.prototype.render = function(){
   }
 };
 
-export default LabelLineChart
+export default TimeLabelLineChart

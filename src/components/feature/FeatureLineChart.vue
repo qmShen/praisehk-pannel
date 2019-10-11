@@ -7,7 +7,7 @@
 
 <script>
 
-    import BrushLineChart from './linechart.js'
+    import BrushLineChart from './FeatureLineChart.js'
 
     import pipeService from '../../service/pipeService.js'
     import dataService from '../../service/dataService.js'

@@ -5,7 +5,7 @@
 import L from "leafLet"
 import * as d3 from "d3";
 import 'leaflet/dist/leaflet.css'
-let HongKongStationList = [67, 68, 70, 74, 77, 78, 79, 80, 81, 82, 83, 84, 85, 87, 89, 90];
+let HongKongStationList = [67, 68, 70, 74, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 87, 90];
 let Map = function(el, el_svg, ceneterLoc, featureType) {
   this.map = L.map(el, { zoomControl:false }).setView(ceneterLoc.loc, 9);
   this.featureType = featureType;
