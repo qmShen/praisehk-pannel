@@ -1,64 +1,56 @@
 <template>
-  <!--<div style="display: block; position: relative">-->
-  <!--<div style="height: 100%; width: 100%" id='map_container'></div>-->
-  <!--<div style="position:absolute; left: 0px; top:0px; z-index: 999; font-size: 10px" >Model Name: {{model_name}}</div>-->
-  <!--</div>-->
   <div style="display: block; position: relative" class="boundary">
-    <div class="mini_head">{{item.feature}}</div>
+    <div class="mini_head">{{dataFeatureError === null?'':dataFeatureError.feature}}
+      <div style="position: absolute; right: 10px; top: 0;">
+        <el-switch
+          v-model="showHK"
+          active-text="HK"
+          inactive-text="Pearl Delta">
+        </el-switch>
+      </div>
+    </div>
   </div>
 
 </template>
-
 <script>
     import FeatureHeatmap from './FeatureHeatmap.js'
     import pipeService from '../../service/pipeService.js'
+
     export default {
         name: "FeatureValue",
-        props:["item", "AQStations"],
+        props:{
+            dataFeatureError: Object,
+            stationAQList: Array,
+        },
         data() {
             return {
-              type: null
+                showHK: false,
             }
         },
-
         watch:{
-            item:function(){
-                this.handler.update(this.item)
+            dataFeatureError:function(new_data){
+                this.handler.setData(new_data);
+            },
+            stationAQList:function(new_data){
+                this.handler.sortStation(new_data, this.showHK);
+            },
+            showHK:function (new_data) {
+                this.handler.sortStation(this.stationAQList, new_data);
             }
         },
         mounted: function(){
-            console.log('item', this.item)
-            if(this.item.feature == 'PM25'){
-                this.type = 'AQ'
-            }else if(this.item.feature == 'Wind' || this.item.feature == 'WindDir' ){
-                this.type = 'Mete'
-            }
-            this.handler = new FeatureHeatmap(this.$el, this.item, this.AQStations);
+            this.handler = new FeatureHeatmap(this.$el);
+
             this.handler.on('mouseover', this.handleMouseover);
-            this.handler.on('mouseout', this.handleMouseout);
             this.handler.on('click', this.handleMouseClick);
-            pipeService.onMouseOverCell(msg=>{
-                this.handler.onMouseInter(msg);
-            });
-            pipeService.onTimeRangeSelected(timerange=>{
-                this.handler.updateByTimeRange(timerange);
-            });
         },
         methods:{
             handleMouseover(msg){
                 msg['action'] = 'over';
-                msg['type'] = this.type;
-                pipeService.emitMouseOverCell(msg)
-            },
-            handleMouseout(msg){
-                msg['action'] = 'out';
-                msg['type'] = this.type;
                 pipeService.emitMouseOverCell(msg)
             },
             handleMouseClick(msg){
                 msg['action'] = 'click';
-                msg['type'] = this.type;
-                this.handler.clickToSelect(msg);
                 pipeService.emitMouseOverCell(msg)
             },
         },

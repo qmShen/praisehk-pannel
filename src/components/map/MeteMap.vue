@@ -39,12 +39,6 @@
             pipeService.onMouseOverCell(msg=>{
                 if(msg['action'] == 'click'){
                     // this.handler.showAQCMAQ(msg);
-                    // console.log('click')
-                }
-                else if(msg['action'] == 'over'){
-                    // this.handler.setCurrentTimestamp(msg);
-                }else if(msg['action'] == 'out'){
-                    // this.handler.mouseoutCircle(msg);
                 }
             });
             // this.handler.on('click', this.clickOnStation);
