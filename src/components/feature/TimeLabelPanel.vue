@@ -61,7 +61,7 @@
             "labelTypeList": Array,
             "username": String,
             "selectFeature": String,
-            "labelQueryId": String,
+            "labelQueryId": Number,
         },
         data () {
             return {
@@ -72,16 +72,7 @@
 
                 // Label system
                 labelList: [],
-                labelData: {
-                    'id': 0,
-                    'username': '',
-                    'label': '',
-                    'feature': '',
-                    'startTime': 0,
-                    'endTime': 0,
-                    'StationId': 0,
-                    'type': ''
-                },
+                labelData: {},
                 labelDialogVisible: false,
             }
         },
@@ -144,12 +135,7 @@
             },
             handleModifyLabel(){
                 this.labelDialogVisible = false;
-                let para = {
-                    'id': this.labelData.id, 'username': this.labelData.userName, 'label': this.labelData.label,
-                    'feature': this.labelData.feature, 'startTime': this.labelData.startTime, 'endTime': this.labelData.endTime,
-                    'StationId': this.labelData.stationId, 'type': this.labelData.labelType
-                };
-                dataService.modifyLabelValue(para);
+                dataService.modifyLabelValue(this.labelData);
 
                 let timeHandler = setInterval(()=>{
                     pipeService.emitLabelUpdate();

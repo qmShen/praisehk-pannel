@@ -59,6 +59,20 @@ TimeLabelLineChart.prototype.render = function(){
 
   // scale of x-axis of the chart
   let xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);
+  let xAxis = d3.axisBottom()
+    .scale(xScale)
+    .ticks(d3.timeDay.every(1))
+    .tickFormat(d => {
+      let year = d.getFullYear();
+      let month = '' + (d.getMonth() + 1);
+      let day = '' + d.getDate();
+
+      if (month.length < 2)
+        month = '0' + month;
+      if (day.length < 2)
+        day = '0' + day;
+      return [year, month, day].join('/');
+    });
 
   // scale of y-axis of the chart
   let yMax = featureYMax[this.selectFeature];
@@ -66,21 +80,19 @@ TimeLabelLineChart.prototype.render = function(){
     .domain([0, yMax]).range([this.svgHeight - this.margin.bottom, this.margin.top]);
 
   // plot CMAQ data
-  let cmaq_container = container.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
   let cmaq_line = d3.line()
     .x(d => xScale(d.time))
     .y(d => {
       return (d.val_cmaq == null || d.val_cmaq === 'null')? yScale(0): yScale(d.val_cmaq);
     });
+
+  let cmaq_container = container.append('g').attr('transform', 'translate(' + [this.margin.left, 0]+')');
   cmaq_container.selectAll('path')
     .data([data]).enter().append('path')
     .attr('d', cmaq_line)
     .attr('fill', 'none')
     .attr('stroke', this.colorScheme.model);
 
-  let xAxis = d3.axisBottom().scale(xScale).tickFormat(d => {
-    return d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ":00";
-  });
   cmaq_container.append('g')
     .attr('class', 'xAxis')
     .call(xAxis)

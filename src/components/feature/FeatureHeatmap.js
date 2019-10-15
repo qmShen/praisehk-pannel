@@ -2,8 +2,8 @@
  * Created by qshen on 17/9/2019.
  */
 
-
 import * as d3 from "d3";
+import pipeService from '../../service/pipeService.js'
 
 let weekDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -16,7 +16,7 @@ let hkStationDict = {
   '74': 'TW_A', '68': 'TM_A', '67': 'TC_A', '70': 'YL_A',
 };
 
-let lengthStationGap = 20;
+let lengthStationGap = 10;
 
 let gradientBoundary = [-100,100];
 let gradientColorsAbs = [
@@ -43,129 +43,143 @@ let FeatureHeatmap = function(el) {
   this.svgHeight = this.$el.clientHeight;
   this.svg = d3.select(el).append('svg').attr('width', this.svgWidth).attr('height', this.svgHeight);
   this.margin = {'top': 10,'bottom': 10, 'left': 40, 'right': 10};
+
+  this.container = this.svg.append('g').attr('transform', 'translate(' + [this.margin.left, this.margin.top] + ')');
 };
 
 FeatureHeatmap.prototype.setData = function(dataFeatureError){
-  this.feature = dataFeatureError['feature'];
-  this.valueArray = dataFeatureError['value'];
-  this.renderHeatmap()
+  this.featureData = dataFeatureError['value'];
+  this.renderHeatmap();
 };
 
-FeatureHeatmap.prototype.sortStation = function(stationAQList, showHK){
+FeatureHeatmap.prototype.sortStation = function(stationAQList){
   let hkStationSet = new Set(hkStationList);
   let hkStationRoadSet = new Set(hkStationRoadList);
 
   let hkStation = [];
-  let hkRoadStation = [];
   let pearlDeltaStation = [];
   stationAQList.forEach(d=>{
     let key = d['id'];
     if( key === 'timestamp' ) return;
 
-    if( hkStationRoadSet.has(key) ) hkRoadStation.push(key);
+    if( hkStationRoadSet.has(key) ) hkStation.unshift(key);
     else if ( hkStationSet.has(key) ) hkStation.push(key);
     else pearlDeltaStation.push(key);
   });
 
-  this.stationAQList = hkRoadStation.concat(hkStation);
-  this.showHK = showHK;
-  if ( !this.showHK ) {
-    this.stationAQList = this.stationAQList.concat(pearlDeltaStation);
-  }
+  this.stationAQList = hkStation;
+  this.stationAQListPearlDelta = pearlDeltaStation;
 };
 
 FeatureHeatmap.prototype.renderHeatmap = function(){
   let _this = this;
-  let numOfStation = this.stationAQList.length;
-  let rowHeight = (this.svgHeight - this.margin.top - this.margin.bottom - lengthStationGap*2) / numOfStation;
-  let unitWidth = this.showHK?(this.svgWidth - this.margin.left - this.margin.right) / this.valueArray.length: rowHeight;
-
-  // Re-render
-  this.svg.selectAll('g').remove();
-
-  // scale of x-axis
-  let timeRange = d3.extent(this.valueArray, d=>d['timestamp']);
-  let xScale = d3.scaleLinear().domain(timeRange).range([0, this.svgWidth - this.margin.left - this.margin.right]);
-
-  // Color scale
-  let colorRange = d3.range(0, 1, 1.0 / (gradientColorsAbs.length - 1));
-  colorRange.push(1);
-  let colorScale = d3.scaleLinear()
-    .domain(colorRange)
-    .range(gradientColorsAbs)
-    .interpolate(d3.interpolateHcl);
-  let dataScale = d3.scaleLinear()
-    .domain(gradientBoundary)
-    .range([0, 1]);
+  this.initScale();
+  this.svg.selectAll('.row').remove();
+  let aqList = this.showPearlDelta? this.stationAQList.concat(this.stationAQListPearlDelta): this.stationAQList;
 
   // Row container
-  this.container = this.svg.append('g').attr('transform', 'translate(' + [this.margin.left, this.margin.top] + ')');
   let rowContainer = this.container
     .selectAll('.row')
-    .data(this.stationAQList)
+    .data(aqList)
     .enter()
     .append('g')
     .attr('class', 'row')
     .attr('transform',(d, i) => {
       let gap = (i >= hkStationList.length)? lengthStationGap: 0;
-      return 'translate('+[0, rowHeight * i + gap] + ')'
-    });
-
-  // Render row by row
-  rowContainer.each(function(stationId){
-    let cell_containers = d3.select(this)
-      .selectAll('.cell')
-      .data(_this.valueArray)
-      .enter()
-      .append('g')
-      .attr('class', 'cell')
-      .attr('transform', d => 'translate(' + [xScale(d.timestamp), 0] + ')');
-
-    let rects = cell_containers
-      .append('rect')
-      .attr('width', unitWidth)
-      .attr('height', rowHeight)
-      .attr('rx', unitWidth / 5)
-      .attr('fill', d => {return (d[stationId] === null || d[stationId] === 'null')? '#d4d4d4': colorScale(dataScale(d[stationId]))})
-      .attr('stroke', 'white')
-      .attr('stroke-width', 1);
-
-    rects
-      .append('title')
-      .text(d=>{
-        let _id = stationId in hkStationDict? hkStationDict[stationId]: stationId;
-        let value = (d[stationId] === null || d[stationId] === 'null')? 'Null': parseInt(d[stationId] * 100) / 100;
-        return 'Id: '+ _id + ' error: ' + value + '\nTimestamp: ' + format_date(new Date(d.timestamp * 1000));
-    });
-
-    // Handle mouse event
-    rects.on('mouseout', function(){
-      this.setAttribute('stroke', 'white');
-      this.setAttribute('stroke-width', '1');
-    });
-    rects.on('mouseover', function(d){
-      this.setAttribute('stroke', 'red');
-      this.setAttribute('stroke-width', '2');
-      _this.mouseover({
-        'timestamp': d.timestamp,
-        'stationId': stationId
-      });
-    });
-    rects.on('click', function(d){
-      _this.click({
-        'timestamp': d.timestamp,
-        'stationId': stationId
-      })
+      return 'translate('+[0, _this.rowHeight * i + gap] + ')'
     })
-  });
-
-  this.HightLightRowRect = this.container.append('rect').attr('fill', 'none')
-    .attr('stroke', '#fd8d3c').attr('width', this.svgWidth - this.margin['left']- this.margin['right']).attr('height', rowHeight).attr('stroke-width', 0);
+    .each(function(stationId) {
+      _this.generateNewCells(this, stationId);
+    });
 
   this.renderGradientLegend();
 };
 
+FeatureHeatmap.prototype.initScale = function() {
+  this.rowHeight = this.svgHeight - this.margin.top - this.margin.bottom*2 - lengthStationGap;
+  this.unitWidth = this.svgWidth - this.margin.left - this.margin.right;
+  if ( this.showPearlDelta ) {
+    this.rowHeight /= (this.stationAQList.length+this.stationAQListPearlDelta.length);
+    this.unitWidth = this.rowHeight;
+  } else {
+    this.rowHeight /= this.stationAQList.length;
+    this.unitWidth /= this.featureData.length;
+  }
+
+  // scale of x-axis
+  let timeRange = d3.extent(this.featureData, d=>d.timestamp);
+  this.xScale = d3.scaleLinear().domain(timeRange).range([0, this.svgWidth - this.margin.left - this.margin.right - this.unitWidth]);
+
+  // Color scale
+  let colorRange = d3.range(0, 1, 1.0 / (gradientColorsAbs.length - 1));
+  colorRange.push(1);
+  this.colorScale = d3.scaleLinear()
+    .domain(colorRange)
+    .range(gradientColorsAbs)
+    .interpolate(d3.interpolateHcl);
+  this.dataScale = d3.scaleLinear()
+    .domain(gradientBoundary)
+    .range([0, 1]);
+};
+
+FeatureHeatmap.prototype.generateNewCells = function (rowContainer, stationId) {
+  let _this = this;
+
+  let cell_containers = d3.select(rowContainer)
+    .selectAll('.cell')
+    .data(_this.featureData)
+    .enter()
+    .append('g')
+    .attr('class', 'cell')
+    .attr('transform', d => 'translate(' + [_this.xScale(d.timestamp), 0] + ')');
+
+  let rects = cell_containers
+    .append('rect')
+    .attr('width', _this.unitWidth > 1?_this.unitWidth-1: _this.unitWidth)
+    .attr('height', _this.rowHeight-1 > 1? _this.rowHeight-1: _this.rowHeight)
+    .attr('rx', _this.unitWidth / 5)
+    .attr('fill', d => {
+      return (d[stationId] === null || d[stationId] === 'null')?
+        '#d4d4d4':
+        _this.colorScale(_this.dataScale(d[stationId]))
+    })
+    .attr('stroke', 'white')
+    .attr('stroke-width', 1);
+
+  rects
+    .append('title')
+    .text(d=>{
+      let _id = stationId in hkStationDict? hkStationDict[stationId]: stationId;
+      let value = (d[stationId] === null || d[stationId] === 'null')? 'Null': parseInt(d[stationId] * 100) / 100;
+      return 'Id: '+ _id + ' error: ' + value + '\nTimestamp: ' + format_date(new Date(d.timestamp * 1000));
+    });
+
+  //Handle mouse event
+  rects.on('mouseout', function(){
+    this.setAttribute('stroke', 'white');
+  });
+  rects.on('mouseover', function(d){
+    this.setAttribute('stroke', 'red');
+    let msg = {
+      'timestamp': d.timestamp,
+      'stationId': stationId,
+      'action': 'over'
+    };
+    pipeService.emitMouseOverCell(msg);
+  });
+  rects.on('click', function(d){
+    let msg = {
+      'timestamp': d.timestamp,
+      'stationId': stationId,
+      'action': 'click'
+    };
+    pipeService.emitMouseOverCell(msg);
+  });
+};
+
 FeatureHeatmap.prototype.renderGradientLegend = function() {
+  if ( this.gradientLegendGroup !== undefined ) return;
+
   this.gradientLegendGroup = this.svg.append('g')
     .attr('class', 'gradient_legend_group');
 
@@ -175,10 +189,9 @@ FeatureHeatmap.prototype.renderGradientLegend = function() {
     .attr('x1', '0%')
     .attr('y1', '100%')
     .attr('x2', '0%')
-    .attr('y2', '0%');
-  gradientLegendRainbow
+    .attr('y2', '0%')
     .selectAll('stop')
-    .data( gradientColorsAbs )
+    .data(gradientColorsAbs)
     .enter()
     .append('stop')
     .attr('offset', (d, i) => i/(gradientColorsAbs.length-1) )
@@ -190,10 +203,9 @@ FeatureHeatmap.prototype.renderGradientLegend = function() {
     .attr('x1', '0%')
     .attr('y1', '100%')
     .attr('x2', '0%')
-    .attr('y2', '0%');
-  gradientLegendYGB
+    .attr('y2', '0%')
     .selectAll('stop')
-    .data( gradientColors )
+    .data(gradientColors)
     .enter()
     .append('stop')
     .attr('offset', (d, i) => i/(gradientColors.length-1) )

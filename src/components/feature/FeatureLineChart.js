@@ -1,4 +1,5 @@
 import * as d3 from 'd3'
+import TimeLabelLineChart from "./TimeLabelLineChart";
 
 let FeatureLineChart = function(el){
   this.$el = el;
@@ -8,15 +9,8 @@ let FeatureLineChart = function(el){
   this.margin = {'top': 20,'bottom': 20, 'left': 30, 'right':10};
 };
 
-function toDateTime(secs) {
-  return new Date(parseInt(secs) * 1000);
-}
-
-FeatureLineChart.prototype.setTimeRange = function(timerange){
-  this.timerange = timerange;
-  if(this.data){
-    this.render();
-  }
+let dateToSecs = function(date){
+  return parseInt(date.getTime() / 1000);
 };
 
 let featureYMax = {
@@ -27,7 +21,7 @@ let featureYMax = {
 FeatureLineChart.prototype.render = function(){
   let data = [];
   this.data.forEach(d=>{
-    if(d.timestamp > this.timerange[0] && d.timestamp < this.timerange[1]){
+    if(d.timestamp > this.startTime && d.timestamp < this.endTime){
       d['time'] = new Date(d.timestamp * 1000);
       data.push(d)
     }
@@ -35,20 +29,30 @@ FeatureLineChart.prototype.render = function(){
 
   this.svg.selectAll('g').remove();
   let container = this.svg.append('g');
-  let dateRange = [new Date(this.timerange[0] * 1000), new Date(this.timerange[1] * 1000)];
+
+  let dateRange = [new Date(this.startTime * 1000), new Date(this.endTime * 1000)];
   this.xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);
   let xScale = this.xScale;
+  let xAxis = d3.axisBottom()
+    .scale(xScale)
+    .ticks(d3.timeDay.every(1))
+    .tickFormat(d=>{
+      let month = '' + (d.getMonth() + 1);
+      let day = '' + d.getDate();
 
-  var xAxis = d3.axisBottom().scale(xScale).tickFormat(d=>{
-    return   d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' +  d.getHours() + ":00";
+      if (month.length < 2)
+        month = '0' + month;
+      if (day.length < 2)
+        day = '0' + day;
+    return [month, day].join('/');
   });
 
   let yMax = featureYMax[this.selectFeature];
-  var yScale = d3.scaleLinear()
-    .domain([0,  yMax]).range([this.svgHeight - this.margin.bottom, this.margin.top]);
-  var yAxis = d3.axisLeft().scale(yScale);
+  let yScale = d3.scaleLinear()
+    .domain([0,  yMax]).range([this.svgHeight - this.margin.top - this.margin.bottom, this.margin.top]);
+  let yAxis = d3.axisLeft().scale(yScale);
 
-  var cmaq_line = d3.line()
+  let cmaq_line = d3.line()
     .x(d => xScale(d.time))
     .y(d => {
       return (d.val_cmaq == null || d.val_cmaq === 'null')? yScale(0): yScale(d.val_cmaq);
@@ -64,7 +68,7 @@ FeatureLineChart.prototype.render = function(){
   cmaq_container.append('g')
     .attr('class', 'xAxis')
     .call(xAxis)
-    .attr('transform', 'translate('+[0, this.svgHeight - this.margin.bottom] +')');
+    .attr('transform', 'translate('+[0, this.svgHeight- this.margin.top - this.margin.bottom] +')');
 
   cmaq_container.append('g')
     .attr('class', 'yAxis')
@@ -88,7 +92,7 @@ FeatureLineChart.prototype.render = function(){
     .attr("x1", 0).attr("y1",0).attr("x2", 0).attr("y2", 0);
 
   // Time Brush
-  this.setTimeBrush(this.timerange[0], this.timerange[1]);
+  this.setTimeBrush();
 };
 
 FeatureLineChart.prototype.setData = function(data, stationId){
@@ -96,6 +100,12 @@ FeatureLineChart.prototype.setData = function(data, stationId){
   this.stationId = stationId;
   this.render();
 };
+
+FeatureLineChart.prototype.setTime = function(st, et){
+  this.startTime = st;
+  this.endTime = et;
+};
+
 
 FeatureLineChart.prototype.setCurrentTimestamp = function(t){
   if(this.data == undefined || this.data == null || this.currentTimeLine == undefined){
@@ -107,36 +117,28 @@ FeatureLineChart.prototype.setCurrentTimestamp = function(t){
 
 };
 
-let dateToSecs = function(date){
-  return parseInt(date.getTime() / 1000);
-};
 FeatureLineChart.prototype.on = function(msg, func){
   if(msg == 'brushEnd'){
     this.brushEnd = func
   }
 };
 
-FeatureLineChart.prototype.setTimeBrush = function(startTimestamp, endTimestamp){
+FeatureLineChart.prototype.setTimeBrush = function(){
   let _this = this;
-  startTimestamp = startTimestamp == undefined? 1451739600: startTimestamp;
-  endTimestamp = endTimestamp == undefined? 1451750400: endTimestamp;
 
-  let dateRange = [new Date(this.timerange[0] * 1000), new Date(this.timerange[1] * 1000)];
-  let xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);;
-
-  var brush = d3.brushX()
+  let brush = d3.brushX()
     .extent([[0, 0], [this.svgWidth - this.margin.left - this.margin.right, this.svgHeight]])
     .on("end", brushed);
 
   this.svg.append("g").attr('transform', 'translate(' + [this.margin.left, 0]+')')
     .attr("class", "brush")
-    .call(brush)
-    .call(brush.move, [0, this.svgWidth / 40]);
+    .call(brush);
 
   function brushed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-    var s = d3.event.selection || xScale.range();
-    let filter_range = s.map(xScale.invert, xScale);
+    if (d3.event.selection === null) return; // ignore click
+    let s = d3.event.selection || _this.xScale.range();
+    let filter_range = s.map(_this.xScale.invert, _this.xScale);
     _this.brushEnd([dateToSecs(filter_range[0]), dateToSecs(filter_range[1]), _this.stationId]);
   }
 };

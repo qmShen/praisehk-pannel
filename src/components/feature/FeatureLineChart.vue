@@ -1,6 +1,6 @@
 <template>
   <div class="boundary">
-    <div class="mini_head">{{this.selectFeature}} at </div>
+    <div class="mini_head">{{this.selectFeature}} at {{this.stationName}}</div>
     <slot></slot>
   </div>
 </template>
@@ -12,7 +12,22 @@
 
     export default {
         name: "FeatureLineChart",
-        props:["currentTime", 'colorScheme', 'selectFeature'],
+        props:{
+            "currentTime": Number,
+            'colorScheme': Object,
+            'selectFeature': String,
+            'hkStationDict': Object
+        },
+        data() {
+            return {
+                stationId: null
+            }
+        },
+        computed: {
+            stationName() {
+                return this.stationId in this.hkStationDict? this.hkStationDict[this.stationId]: this.stationId;
+            }
+        },
         mounted:function(){
             this.LineChart = new FeatureLineChart(this.$el);
             this.LineChart.colorScheme = this.colorScheme;
@@ -21,17 +36,21 @@
 
             pipeService.onMouseOverCell(msg=>{
                 if(msg['action'] === 'click'){
+                    this.stationId = msg['stationId'];
                     this.queryModelObs(msg['stationId']);
                 }
             });
 
-            pipeService.onTimeRangeSelected(timerange=>{
-                this.LineChart.setTimeRange(timerange);
+            pipeService.onTimeRangeSelected(timeRange=>{
+                this.LineChart.setTime(timeRange[0], timeRange[1]);
             });
         },
         watch:{
             currentTime(t){
                 this.LineChart.setCurrentTimestamp(t);
+            },
+            selectFeature: function(new_data) {
+                this.LineChart.selectFeature = new_data;
             }
         },
         methods:{

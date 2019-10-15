@@ -26,6 +26,9 @@
             },
             startTime: function() {
                 this.LineChart.setTime(this.startTime, this.endTime);
+            },
+            selectFeature: function(new_data) {
+                this.LineChart.selectFeature = new_data;
             }
         },
         data () {

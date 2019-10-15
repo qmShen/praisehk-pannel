@@ -6,7 +6,6 @@
         <option disabled value="">Select</option>
         <option v-for="item in featureList">{{item}}</option>
       </select>
-
     </div>
     <el-row :gutter="10" class="horizontal_stripe">
       <el-col :span="8" class="left">
@@ -50,12 +49,13 @@
           :color-scheme="colorScheme"
           :current-time="currentTime"
           :select-feature="selectFeature"
+          :hk-station-dict="HKStationDict"
           v-loading="AQMapLoading" element-loading-text="Loading" element-loading-background="rgba(0, 0, 0, 0.4)">
           <div style="position: absolute; right: 10px; top: 25px" >
             <el-button type="success" icon="el-icon-video-play" size="mini"  v-bind:disabled="buttonDisable" v-on:click="toggleAnimation" circle></el-button>
             <input type="text" v-model="labelName" size="10" style="height: 20px" placeholder="label name"></input>
 
-            <select v-model="selected" style="height: 26px">
+            <select v-model="labelSelected" style="height: 26px">
               <option disabled value="">Select</option>
               <option v-for="item in labelTypeList">{{item}}</option>
             </select>
@@ -71,6 +71,8 @@
              element-loading-background="rgba(0, 0, 0, 0.4)" >
           <FeatureHeatmap
             style="width: 100%; height: calc(100% );"
+            :global-start-time="globalStartTime"
+            :global-end-time="globalEndTime"
             :data-feature-error="dataFeatureError"
             :station-a-q-list="stationAQList">
           </FeatureHeatmap>
@@ -88,8 +90,13 @@
       <el-input size = "mini" style="margin-top: 10px"  v-model="username" placeholder="Username" @keyup.enter.native="handleClose"></el-input>
 
       <span>Station of Interest:</span>
-        <el-select style="margin-top: 10px" v-model="labelQueryId" placeholder="Select...">
-          <el-option v-for="(station, index) in HKStationList" :key="index" :label="HKStationDict[station]" :value="station"></el-option>
+        <el-select style="margin-top: 10px" v-model="labelQueryId" placeholder="Select..." value="null">
+          <el-option
+            v-for="station in HKStationList"
+            :key="station.index"
+            :label="HKStationDict[station]"
+            :value="station">
+          </el-option>
         </el-select>
       <span  slot="footer" class="dialog-footer">
         <el-button style="margin-top: -10px" size = "mini" type="primary" @click="handleClose">Confirm</el-button>
@@ -160,7 +167,7 @@
                 labelEndTime: null,
                 labelStationId: null,
                 labelQueryId: null,
-                selected:'other',
+                labelSelected:'other',
                 selectFeature:'NO2',
             }
         },
@@ -274,11 +281,19 @@
                 }
 
                 let para = {
-                    'username': this.username, 'label': this.labelName, 'feature': this.selectFeature,
-                    'startTime': this.labelStartTime, 'endTime': this.labelEndTime, 'StationId': this.labelStationId, 'type': this.selected
+                    'userName': this.username,
+                    'label': this.labelName,
+                    'feature': this.selectFeature,
+                    'startTime': this.labelStartTime,
+                    'endTime': this.labelEndTime,
+                    'stationId': this.labelStationId,
+                    'labelType': this.labelSelected
                 };
                 dataService.saveLabelValue(para);
-                pipeService.emitLabelUpdate();
+                let timeHandler = setInterval(()=>{
+                    pipeService.emitLabelUpdate();
+                    clearInterval(timeHandler);
+                }, 1000);
             },
             toggleAnimation:function(){
                 this.isButtonClicked = !this.isButtonClicked;

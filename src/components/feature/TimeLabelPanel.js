@@ -103,9 +103,9 @@ let dateToSecs = function(date){
 
 TimeLabelPanel.prototype.initTimeBrush = function(){
   let _this = this;
-  let maxBrushSize = this.svgWidth / 28;
   let dateRange = [new Date(this.globalStartTime * 1000), new Date(this.globalEndTime * 1000)];
   let xScale = d3.scaleTime().range([0, this.svgWidth - this.margin.left - this.margin.right]).domain(dateRange);
+  let maxBrushSize = xScale((this.globalStartTime + 24 * 3600 * 14) * 1000);
 
   let brush = d3.brushX()
     .extent([[0, 0], [this.svgWidth - this.margin.left - this.margin.right, this.svgHeight]])
