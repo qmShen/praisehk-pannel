@@ -104,13 +104,16 @@ FeatureLineChart.prototype.setData = function(data, stationId){
 FeatureLineChart.prototype.setTime = function(st, et){
   this.startTime = st;
   this.endTime = et;
+
+  if ( this.data != null ) {
+    this.render();
+  }
 };
 
 
 FeatureLineChart.prototype.setCurrentTimestamp = function(t){
-  if(this.data == undefined || this.data == null || this.currentTimeLine == undefined){
-    return
-  }
+  if( this.data == null || this.currentTimeLine == null ) return;
+
   let x = this.xScale(new Date(t * 1000));
   this.currentTimeLine.style("stroke", '#984a23').attr('stroke-width', 1)
     .attr("x1", x).attr("y1", this.margin['top']).attr("x2", x).attr("y2", this.svgHeight - this.margin['bottom']);
@@ -118,7 +121,7 @@ FeatureLineChart.prototype.setCurrentTimestamp = function(t){
 };
 
 FeatureLineChart.prototype.on = function(msg, func){
-  if(msg == 'brushEnd'){
+  if(msg === 'brushEnd'){
     this.brushEnd = func
   }
 };

@@ -87,6 +87,13 @@
             labelList: function(new_data) {
                 this.timeLabelPanel.render_labels(new_data);
             },
+            labelQueryId: function(new_data) {
+                let _this = this;
+                let timeHandler = setInterval(()=>{
+                    pipeService.emitLabelUpdate(_this.labelQueryId);
+                    clearInterval(timeHandler);
+                }, 1000);
+            }
         },
         mounted: function(){
             // initialise the panel
@@ -131,14 +138,15 @@
             },
             handleCloseLabel(){
                 this.labelDialogVisible = false;
-                pipeService.emitLabelUpdate();
+                pipeService.emitLabelUpdate(this.labelQueryId);
             },
             handleModifyLabel(){
                 this.labelDialogVisible = false;
                 dataService.modifyLabelValue(this.labelData);
 
+                let _this = this;
                 let timeHandler = setInterval(()=>{
-                    pipeService.emitLabelUpdate();
+                    pipeService.emitLabelUpdate(_this.labelQueryId);
                     clearInterval(timeHandler);
                 }, 1000);
             },
@@ -146,8 +154,9 @@
                 this.labelDialogVisible = false;
                 dataService.deleteLabel({'id': this.labelData.id});
 
+                let _this = this;
                 let timeHandler = setInterval(()=>{
-                    pipeService.emitLabelUpdate();
+                    pipeService.emitLabelUpdate(_this.labelQueryId);
                     clearInterval(timeHandler);
                 }, 1000);
             },

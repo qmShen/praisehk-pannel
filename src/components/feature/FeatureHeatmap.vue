@@ -17,6 +17,7 @@
 </template>
 <script>
     import FeatureHeatmap from './FeatureHeatmap.js'
+    import pipeService from "../../service/pipeService";
 
     export default {
         name: "FeatureValue",
@@ -34,18 +35,24 @@
         watch:{
             dataFeatureError:function(new_data){
                 this.handler.setData(new_data);
+                this.handler.clearTimeRangeRectangle();
             },
             stationAQList:function(new_data){
                 this.handler.sortStation(new_data);
             },
             showPearlDelta:function (new_data) {
                 this.handler.showPearlDelta = new_data;
+                this.handler.clearTimeRangeRectangle();
                 this.handler.renderHeatmap();
             }
         },
         mounted: function(){
             this.handler = new FeatureHeatmap(this.$el);
             this.handler.showPearlDelta = this.showPearlDelta;
+
+            pipeService.onTimeRangeBrushed(range=>{
+                this.handler.renderTimeRangeRectangle(range);
+            });
         },
     }
 </script>

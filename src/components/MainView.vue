@@ -153,14 +153,7 @@
                 MeteDataN: 0,
                 mapReadyN:0,
 
-                // Not yet classified
-                centerLoc:{loc: [22.3586, 114.1271]},
-                currentTime: null,
-                timeRange:[],
-                timeHandler:null,
-                buttonDisable: false,
-                isButtonClicked: false,
-                dialogVisible: true,
+                // Label system
                 username: '',
                 labelName: '',
                 labelStartTime: null,
@@ -168,7 +161,16 @@
                 labelStationId: null,
                 labelQueryId: null,
                 labelSelected:'other',
-                selectFeature:'NO2',
+
+                // Not yet classified
+                selectFeature:'PM25',
+                centerLoc:{loc: [22.3586, 114.1271]},
+                currentTime: null,
+                timeRange:[],
+                timeHandler:null,
+                buttonDisable: false,
+                isButtonClicked: false,
+                dialogVisible: true,
             }
         },
         mounted: function(){
@@ -238,13 +240,17 @@
 
             pipeService.onMouseOverCell(msg=>{
                 if(msg['action'] === 'click'){
+                    // Recenter the maps
                     this.stationAQList.forEach(d=>{
                         if(d.id === msg['stationId']){
                             this.centerLoc= {
                                 'loc':[d.latitude, d.longitude]
-                            }
+                            };
                         }
-                    })
+                    });
+
+                    // Refresh Labels
+                    this.labelQueryId = msg['stationId'];
                 }else if(msg['action'] === 'over'){
                     this.currentTime = msg['timestamp'];
                 }
@@ -290,8 +296,10 @@
                     'labelType': this.labelSelected
                 };
                 dataService.saveLabelValue(para);
+
+                let _this = this;
                 let timeHandler = setInterval(()=>{
-                    pipeService.emitLabelUpdate();
+                    pipeService.emitLabelUpdate(_this.labelQueryId);
                     clearInterval(timeHandler);
                 }, 1000);
             },
@@ -324,7 +332,7 @@
                         });
                 }else{
                     this.dialogVisible = false;
-                    pipeService.emitLabelUpdate();
+                    pipeService.emitLabelUpdate(this.labelQueryId);
                 }
             }
         },

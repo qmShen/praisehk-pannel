@@ -16,8 +16,6 @@ let hkStationDict = {
   '74': 'TW_A', '68': 'TM_A', '67': 'TC_A', '70': 'YL_A',
 };
 
-let lengthStationGap = 10;
-
 let gradientBoundary = [-100,100];
 let gradientColorsAbs = [
   "#d7191c", "#e76818", "#f29e2e", "#f9d057",
@@ -29,6 +27,16 @@ let gradientColors = [
   "#41b6c4", "#1d91c0", "#225ea8", "#253494",
   "#081d58"
 ];
+let gradientColorsBWR = [
+  "#d7191c", "#f29e2e",
+  "#ffffff",
+  "#00ccbc", "#253494"
+];
+
+let lengthStationGap = 10;
+let selectedColor = gradientColorsBWR;
+
+
 
 let format_date = function(date){
   let month = date.getMonth() >= 9?date.getMonth() + 1:'0' + (date.getMonth() + 1);
@@ -75,12 +83,12 @@ FeatureHeatmap.prototype.renderHeatmap = function(){
   let _this = this;
   this.initScale();
   this.svg.selectAll('.row').remove();
-  let aqList = this.showPearlDelta? this.stationAQList.concat(this.stationAQListPearlDelta): this.stationAQList;
+  this.aqList = this.showPearlDelta? this.stationAQList.concat(this.stationAQListPearlDelta): this.stationAQList;
 
   // Row container
   let rowContainer = this.container
     .selectAll('.row')
-    .data(aqList)
+    .data(this.aqList)
     .enter()
     .append('g')
     .attr('class', 'row')
@@ -111,12 +119,11 @@ FeatureHeatmap.prototype.initScale = function() {
   this.xScale = d3.scaleLinear().domain(timeRange).range([0, this.svgWidth - this.margin.left - this.margin.right - this.unitWidth]);
 
   // Color scale
-  let colorRange = d3.range(0, 1, 1.0 / (gradientColorsAbs.length - 1));
+  let colorRange = d3.range(0, 1, 1.0 / (selectedColor.length - 1));
   colorRange.push(1);
   this.colorScale = d3.scaleLinear()
     .domain(colorRange)
-    .range(gradientColorsAbs)
-    .interpolate(d3.interpolateHcl);
+    .range(selectedColor);
   this.dataScale = d3.scaleLinear()
     .domain(gradientBoundary)
     .range([0, 1]);
@@ -140,7 +147,7 @@ FeatureHeatmap.prototype.generateNewCells = function (rowContainer, stationId) {
     .attr('rx', _this.unitWidth / 5)
     .attr('fill', d => {
       return (d[stationId] === null || d[stationId] === 'null')?
-        '#d4d4d4':
+        '#ffffff':
         _this.colorScale(_this.dataScale(d[stationId]))
     })
     .attr('stroke', 'white')
@@ -211,11 +218,27 @@ FeatureHeatmap.prototype.renderGradientLegend = function() {
     .attr('offset', (d, i) => i/(gradientColors.length-1) )
     .attr('stop-color', d => d);
 
+  // gradient Blue-White_Red
+  let gradientLegendBWR = this.gradientLegendGroup.append('linearGradient')
+    .attr('id', 'gradient_legend_b_r_w')
+    .attr('x1', '0%')
+    .attr('y1', '100%')
+    .attr('x2', '0%')
+    .attr('y2', '0%')
+    .selectAll('stop')
+    .data(gradientColorsBWR)
+    .enter()
+    .append('stop')
+    .attr('offset', (d, i) => i/(gradientColorsBWR.length-1) )
+    .attr('stop-color', d => d);
+
+  let selectedLegend = 'gradient_legend_b_r_w';
+
   this.gradientLegendGroup.append('rect')
     .attr('transform', "translate(" + [23, 10] + ")")
     .attr('width', 15)
     .attr('height', 200)
-    .style('fill', 'url(#gradient_legend_rainbow)');
+    .style('fill', `url(#${selectedLegend})`);
 
   let gradientLegendScale = d3.scaleLinear()
     .domain(gradientBoundary)
@@ -229,6 +252,35 @@ FeatureHeatmap.prototype.renderGradientLegend = function() {
   this.gradientLegendGroup.append('g')
     .call(gradientLegendAxis)
     .attr('transform', "translate(" + [23, 10] + ")");
+};
+
+FeatureHeatmap.prototype.clearTimeRangeRectangle = function() {
+  this.svg.selectAll('.time_rect').remove();
+};
+
+FeatureHeatmap.prototype.renderTimeRangeRectangle = function(range) {
+  let labelStartTime = range[0];
+  let labelEndTime = range[1];
+  let labelStationId = this.aqList.indexOf(range[2]);
+
+  this.clearTimeRangeRectangle();
+
+  if ( labelStationId === -1 ) return;
+
+  let gap = (labelStationId >= hkStationList.length)? lengthStationGap: 0;
+  let timeRect = this.svg.append('g')
+    .attr('class', 'time_rect')
+    .attr('transform', 'translate(' +
+      [this.margin.left + this.xScale(labelStartTime),
+        this.margin.top + labelStationId * this.rowHeight + gap] + ')');
+
+  timeRect
+    .append('rect')
+    .attr('width', this.xScale(labelEndTime) - this.xScale(labelStartTime))
+    .attr('height', this.rowHeight)
+    .attr('fill', 'none')
+    .attr('stroke', 'red')
+    .attr('stroke-width', 1);
 };
 
 FeatureHeatmap.prototype.on = function(msg, func){
